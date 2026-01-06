@@ -37,6 +37,9 @@ dependencies = [
     "loguru>=0.6.0",
     "typer[all]>=0.12.0",  # CLI
     "rich>=13.0.0",  # Rich formatting
+    "python-jose[cryptography]>=3.3.0",  # JWT
+    "passlib[bcrypt]>=1.7.4",  # Password hashing
+    "PyJWT>=2.8.0",  # JWT encoding/decoding
 ]
 
 [project.optional-dependencies]
@@ -51,6 +54,7 @@ dev = [
     "sphinx>=6.0.0",
     "sphinx-autodoc-typehints>=1.20.0",
     "behave>=1.2.6",
+    "faker>=21.0.0",
 ]
 sqlite = [
     "aiosqlite>=0.19.0",

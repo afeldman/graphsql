@@ -1,6 +1,7 @@
 """Application settings loaded from environment variables via python-decouple."""
 from __future__ import annotations
 
+import secrets
 from dataclasses import dataclass, field
 from typing import List
 
@@ -32,6 +33,9 @@ class Settings:
     default_page_size: int = 50
     max_page_size: int = 1000
     log_level: str = "INFO"
+    jwt_secret_key: str = ""
+    jwt_algorithm: str = "HS256"
+    jwt_expiration_minutes: int = 1440  # 24 hours
 
     @classmethod
     def load(cls) -> "Settings":
@@ -52,6 +56,9 @@ class Settings:
         - ``DEFAULT_PAGE_SIZE``: Page size for REST/GraphQL listings (default ``50``)
         - ``MAX_PAGE_SIZE``: Max page size allowed (default ``1000``)
         - ``LOG_LEVEL``: Log level for the service (default ``INFO``)
+        - ``JWT_SECRET_KEY``: Secret key for JWT encoding (auto-generated if not set)
+        - ``JWT_ALGORITHM``: JWT algorithm (default ``HS256``)
+        - ``JWT_EXPIRATION_MINUTES``: JWT expiration in minutes (default ``1440``)
 
         Examples:
             >>> settings = Settings.load()
@@ -60,6 +67,9 @@ class Settings:
         """
 
         raw_cors = env_config("CORS_ORIGINS", default="*")
+        jwt_secret = env_config("JWT_SECRET_KEY", default="")
+        if not jwt_secret:
+            jwt_secret = secrets.token_urlsafe(32)
 
         return cls(
             database_url=env_config("DATABASE_URL", default="sqlite:///./database.db"),
@@ -72,6 +82,9 @@ class Settings:
             default_page_size=env_config("DEFAULT_PAGE_SIZE", cast=int, default=50),
             max_page_size=env_config("MAX_PAGE_SIZE", cast=int, default=1000),
             log_level=env_config("LOG_LEVEL", default="INFO"),
+            jwt_secret_key=jwt_secret,
+            jwt_algorithm=env_config("JWT_ALGORITHM", default="HS256"),
+            jwt_expiration_minutes=env_config("JWT_EXPIRATION_MINUTES", cast=int, default=1440),
         )
 
     @staticmethod
@@ -93,6 +106,21 @@ class Settings:
         if raw == "*":
             return ["*"]
         return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+    @property
+    def JWT_SECRET_KEY(self) -> str:
+        """Get JWT secret key."""
+        return self.jwt_secret_key
+
+    @property
+    def JWT_ALGORITHM(self) -> str:
+        """Get JWT algorithm."""
+        return self.jwt_algorithm
+
+    @property
+    def JWT_EXPIRATION_MINUTES(self) -> int:
+        """Get JWT expiration minutes."""
+        return self.jwt_expiration_minutes
 
     @property
     def is_sqlite(self) -> bool:

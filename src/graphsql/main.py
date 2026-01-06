@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 
+from graphsql.auth_routes import router as auth_router
 from graphsql.config import settings
 from graphsql.database import db_manager
 from graphsql.graphql_schema import create_graphql_schema
@@ -122,6 +123,9 @@ async def health_check() -> JSONResponse:
 
 # Include REST routes
 app.include_router(rest_router)
+
+# Include Auth routes
+app.include_router(auth_router)
 
 # Include GraphQL routes only if tables are available
 try:

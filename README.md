@@ -1186,6 +1186,155 @@ git push origin feature/your-feature
 # Create pull request on GitHub
 ```
 
+## 🔐 Authentication (JWT)
+
+### Overview
+
+GraphSQL includes built-in **JWT (JSON Web Token) authentication** for securing your API endpoints. The authentication system is optional but recommended for production deployments.
+
+### Features
+
+- ✅ **JWT-based authentication** — Industry-standard JWT tokens
+- ✅ **Password hashing** — Secure bcrypt password storage
+- ✅ **Scope-based access control** — Admin, default, and custom scopes
+- ✅ **Easy integration** — FastAPI dependency injection
+- ✅ **Optional** — Enabled via environment variables
+
+### Quick Start
+
+#### 1. Obtain a Token
+
+```bash
+curl -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 86400
+}
+```
+
+#### 2. Use Token in Requests
+
+```bash
+curl -X GET http://localhost:8000/api/users \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+### Configuration
+
+Add to `.env`:
+
+```env
+# JWT Settings
+JWT_SECRET_KEY=your-super-secret-key-change-this-in-production
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_MINUTES=1440  # 24 hours
+```
+
+**Auto-generation:** If `JWT_SECRET_KEY` is not set, it will be automatically generated on startup.
+
+### Default Users (Demo)
+
+For development/testing, default users are available:
+
+| Username | Password | Scope |
+|----------|----------|-------|
+| `admin` | `admin123` | `admin` |
+| `demo` | `demo123` | `default` |
+
+⚠️ **Security Warning:** Change these credentials in production!
+
+### Usage in Code
+
+#### Protecting Endpoints
+
+```python
+from fastapi import Depends
+from graphsql.auth import get_current_user, TokenData
+
+@app.get("/protected")
+async def protected_endpoint(user: TokenData = Depends(get_current_user)):
+    return {"message": f"Hello, {user.user_id}"}
+```
+
+#### Optional Authentication
+
+```python
+from graphsql.auth import get_optional_user
+
+@app.get("/optional-auth")
+async def optional_auth(user: Optional[TokenData] = Depends(get_optional_user)):
+    if user:
+        return {"message": f"Hello, {user.user_id}"}
+    return {"message": "Hello, anonymous!"}
+```
+
+#### Scope-based Authorization
+
+```python
+from graphsql.auth import require_scope
+
+@app.post("/admin-only")
+async def admin_endpoint(user: TokenData = Depends(require_scope("admin"))):
+    return {"message": "Admin access granted"}
+```
+
+### API Endpoints
+
+#### POST /auth/login
+Authenticate and receive JWT token.
+
+**Request:**
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "...",
+  "token_type": "bearer",
+  "expires_in": 86400
+}
+```
+
+### Programmatic Usage
+
+```python
+from graphsql.auth import create_access_token, verify_token
+
+# Create token
+token_response = create_access_token(user_id="john_doe", scope="admin")
+print(token_response.access_token)
+
+# Verify token
+token_data = verify_token(token_response.access_token)
+print(token_data.user_id)  # "john_doe"
+print(token_data.scope)    # "admin"
+```
+
+### Error Handling
+
+```python
+from fastapi import HTTPException, status
+
+# Missing credentials → 401 Unauthorized
+# Invalid token → 401 Unauthorized
+# Expired token → 401 Unauthorized
+# Insufficient permissions → 403 Forbidden
+```
+
+---
+
 ## 🧪 Testing
 
 ### Quick Start
