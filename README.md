@@ -1,6 +1,26 @@
 # GraphSQL
 
-Automatic REST and GraphQL API for any relational database using FastAPI, SQLAlchemy, and Strawberry GraphQL.
+<div align="center">
+
+![GraphSQL Logo](https://via.placeholder.com/200x200?text=GraphSQL)
+
+**Automatic REST and GraphQL API generator for any SQL database**
+
+[![CI](https://github.com/afeldman/graphsql/workflows/CI/badge.svg)](https://github.com/afeldman/graphsql/actions)
+[![codecov](https://codecov.io/gh/afeldman/graphsql/branch/main/graph/badge.svg)](https://codecov.io/gh/afeldman/graphsql)
+[![PyPI version](https://badge.fury.io/py/graphsql.svg)](https://badge.fury.io/py/graphsql)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: Apache](https://img.shields.io/badge/License-Apache-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[Features](#features) •
+[Installation](#installation) •
+[Quick Start](#quick-start) •
+[Documentation](#documentation) •
+[Contributing](#contributing)
+
+</div>
+
+---
 
 ## ✨ Features
 
@@ -37,9 +57,7 @@ Automatic REST and GraphQL API for any relational database using FastAPI, SQLAlc
 - [Contributing](#contributing)
 - [License](#license)
 
-## 🚀 Quick Start
-
-### Using UV (recommended)
+**[Full Contributing Guide →](CONTRIBUTING.md)**
 
 ```bash
 # Clone repository
