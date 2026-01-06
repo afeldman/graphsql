@@ -29,7 +29,9 @@ Automatic REST and GraphQL API for any relational database using FastAPI, SQLAlc
 - [Docker Deployment](#docker-deployment)
 - [Kubernetes & Helm](#kubernetes--helm)
 - [Environment Variables](#environment-variables)
+- [Additional Databases](#additional-databases-hana-redshift-snowflake)
 - [Development](#development)
+- [Testing](#-testing)
 - [Troubleshooting](#troubleshooting)
 - [Architecture](#architecture)
 - [Contributing](#contributing)
@@ -179,6 +181,42 @@ API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
 ```
+
+## Additional Databases (HANA, Redshift, Snowflake)
+
+Install the cloud dialects when needed (use UV):
+
+```bash
+uv pip install -e ".[dev,cloud]"
+```
+
+#### SAP HANA
+
+```bash
+# .env
+DATABASE_URL=hana+hdbcli://USER:PASSWORD@hana-host:39015/?encrypt=true&sslValidateCertificate=true
+# optional: currentschema=MYSCHEMA
+```
+
+#### Amazon Redshift
+
+```bash
+# .env (password auth)
+DATABASE_URL=redshift+psycopg2://USER:PASSWORD@cluster.region.redshift.amazonaws.com:5439/DBNAME
+# if you prefer the AWS driver: redshift+redshift_connector://USER:PASSWORD@cluster.region.redshift.amazonaws.com:5439/DBNAME
+```
+
+#### Snowflake
+
+```bash
+# .env
+DATABASE_URL=snowflake://USER:PASSWORD@ACCOUNT-ID/DB/SCHEMA?warehouse=WH&role=ROLE
+```
+
+Notes:
+- Provide database and schema for Snowflake; otherwise reflection returns no tables.
+- Redshift may not report primary keys—REST works, but GraphQL IDs might need manual PKs.
+- HANA often uses composite PKs; ensure tables have a clear primary key for GraphQL.
 
 ### Configuration Methods
 
@@ -1046,22 +1084,7 @@ mypy src/
 
 #### Testing
 
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=src --cov-report=html
-
-# Run specific test file
-pytest tests/test_rest_routes.py
-
-# Run with verbose output
-pytest -vv
-
-# Run only specific test
-pytest tests/test_rest_routes.py::test_list_tables
-```
+See [Testing](#-testing) for the full pytest and behave guide, including quick commands, fixtures, and coverage options.
 
 #### Documentation
 
@@ -1144,6 +1167,171 @@ git push origin feature/your-feature
 
 # Create pull request on GitHub
 ```
+
+## 🧪 Testing
+
+### Quick Start
+
+```bash
+pip install -e ".[dev]"
+
+# Everything
+make test           # or: pytest && behave
+
+# Unit tests only
+make test-unit
+
+# BDD tests only
+make test-bdd
+```
+
+- Default test database is `sqlite:///:memory:` for isolation; override with `DATABASE_URL=... pytest` when needed.
+
+### Test Structure
+
+```text
+tests/                              # Unit tests
+├── __init__.py
+├── conftest.py                     # Fixtures
+├── test_config.py                  # Configuration tests
+├── test_rest_routes.py             # REST API tests
+└── test_utils.py                   # Utility tests
+
+features/                           # BDD tests
+├── environment.py                  # Setup/teardown
+├── health_check.feature            # Health check scenarios
+└── steps/                          # Step implementations
+    └── common_steps.py
+```
+
+### Fixtures
+
+- `test_db` — In-memory SQLite URL
+- `db_session` — SQLAlchemy session
+- `client` — FastAPI TestClient bound to test DB
+- `sample_db` — Pre-populated database
+
+### Unit Tests (pytest)
+
+```bash
+# Run all unit tests
+pytest
+
+# Verbose / specific selection
+pytest -vv
+pytest tests/test_config.py
+pytest tests/test_config.py::TestSettingsLoading
+pytest tests/test_config.py::TestSettingsLoading::test_load_defaults
+
+# Coverage
+pytest --cov=src --cov-report=html
+pytest --cov=src --cov-report=term-missing
+```
+
+- `test_config.py` — Settings load, env parsing, database type detection, auth, pagination, CORS
+- `test_utils.py` — Data cleaning, datetime/decimal/bytes handling, nested structures
+- `test_rest_routes.py` — Health, root info, table listing, docs endpoints
+
+### BDD Tests (behave)
+
+```bash
+# Run all scenarios
+behave
+
+# Targeted runs
+behave -v
+behave features/health_check.feature
+behave --tags=@important
+
+# Reporting
+behave --format=pretty
+behave --format=html -o reports/behave_report.html
+behave --format=json -o reports/behave_report.json
+```
+
+- `health_check.feature` — Health status and root info flows
+- Steps live in `features/steps/common_steps.py`; shared environment setup in `features/environment.py`.
+
+### Coverage & CI Commands
+
+```bash
+# Local coverage
+pytest --cov=src --cov-report=html
+open htmlcov/index.html
+
+# CI-friendly
+pytest --cov=src --cov-report=xml && behave --format=json -o reports/behave.json
+```
+
+### Common Commands
+
+```bash
+make test-coverage      # Coverage run
+make test-watch         # Watch mode (requires pytest-watch)
+make format && make lint && make type-check
+```
+
+### Debugging Tests
+
+```bash
+pytest -s tests/test_config.py              # Show prints
+pytest --pdb tests/test_config.py           # Drop into debugger
+pytest -x tests/test_config.py              # Stop at first failure
+pytest -vv tests/test_rest_routes.py        # Verbose
+```
+
+### Examples
+
+```python
+def test_load_defaults(monkeypatch):
+    """Load settings with defaults."""
+    monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
+    settings = Settings.load()
+    assert settings.api_port == 8000
+```
+
+```gherkin
+Scenario: Create a new record
+  Given a database with "users" table
+  When I send a POST request to /api/users with user data
+  Then the response status should be 201
+```
+
+### Best Practices
+
+- **Unit:** Use Arrange-Act-Assert, lean on fixtures for setup, keep assertions focused on one behavior.
+- **BDD:** Keep steps business-focused and reusable; stick to clear Given/When/Then phrasing.
+
+### Advanced Tips
+
+- Mock external services (e.g., patch `graphsql.database.create_engine`) to isolate logic.
+- Build database fixtures for performance or data-heavy tests; commit after inserts to keep state consistent.
+- Light performance checks: time critical endpoints (e.g., `GET /api/users?limit=1000`) and assert reasonable bounds.
+
+### Common Issues
+
+- `ModuleNotFoundError: No module named 'graphsql'` → install in editable mode: `pip install -e .`.
+- SQLite locked errors → use in-memory DB for tests: `DATABASE_URL=sqlite:///:memory:`.
+- Behave cannot find steps → ensure structure `features/steps/__init__.py` exists and steps are under `features/steps/`.
+
+### Workflow Helpers
+
+```bash
+# Pre-commit hook to run tests
+echo "pytest && behave" > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+# Watch mode (requires pytest-watch)
+ptw
+
+# Parallel execution (requires pytest-xdist)
+pytest -n auto
+```
+
+### References
+
+- [Pytest Documentation](https://docs.pytest.org/)
+- [Behave Documentation](https://behave.readthedocs.io/)
+- [FastAPI Testing](https://fastapi.tiangolo.com/advanced/testing-dependencies/)
 
 ## 🔍 Troubleshooting
 
