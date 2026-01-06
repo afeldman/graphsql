@@ -555,6 +555,26 @@ services:
       - postgres-data:/var/lib/postgresql/data
 ```
 
+### Production Stack (API + Admin)
+
+Use the production compose to run the API, Redis-backed streaming, PostgreSQL, and the Fresh admin dashboard.
+
+```bash
+# Build and start everything
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Tail logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Stop and remove
+docker compose -f docker-compose.prod.yml down
+```
+
+Service endpoints:
+- API: http://localhost:8000 (env: `DATABASE_URL`, `REDIS_URL`, `API_HOST`, `API_PORT`, `LOG_LEVEL`, `CORS_ORIGINS`)
+- Admin: http://localhost:8001 (env: `GRAPHSQL_URL` pointing at the API base)
+- PostgreSQL and Redis use named volumes for persistence (`postgres_data`)
+
 ### Health Checks
 
 ```bash
@@ -1099,6 +1119,25 @@ ruff check src/
 # Type checking with mypy
 mypy src/
 ```
+
+#### Admin (Fresh) Development
+
+```bash
+# Install Deno (1.43+) locally
+curl -fsSL https://deno.land/install.sh | sh
+
+# Dev server (watches routes/static)
+cd admin && deno task dev
+
+# Build static output
+deno task build
+
+# Format / lint (also runs via pre-commit)
+deno fmt --check admin
+deno lint admin
+```
+
+Pre-commit runs `deno fmt`/`deno lint` for the admin folder; ensure Deno is available locally before committing.
 
 #### Testing
 

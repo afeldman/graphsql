@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: graphsql
+      POSTGRES_USER: graphsql
+      POSTGRES_PASSWORD: graphsql_prod_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graphsql"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  graphsql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://graphsql:graphsql_prod_password@postgres:5432/graphsql
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_RELOAD: "false"
+      CORS_ORIGINS: "*"
+      LOG_LEVEL: INFO
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    environment:
+      GRAPHSQL_URL: http://graphsql:8000
+    depends_on:
+      graphsql:
+        condition: service_started
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

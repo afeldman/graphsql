@@ -27,3 +27,18 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-all]
+
+  - repo: local
+    hooks:
+      - id: deno-fmt
+        name: deno fmt (admin)
+        entry: deno fmt --check admin
+        language: system
+        pass_filenames: false
+        types_or: [ts, tsx, json, css]
+      - id: deno-lint
+        name: deno lint (admin)
+        entry: deno lint admin
+        language: system
+        pass_filenames: false
+        types_or: [ts, tsx]
