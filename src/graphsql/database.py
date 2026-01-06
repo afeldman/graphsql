@@ -1,10 +1,10 @@
 """Database connection and model management."""
 from typing import Any, Dict, Optional, Type
-from contextlib import asynccontextmanager
-from sqlalchemy import create_engine, inspect, MetaData, Table
+from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
+from loguru import logger
 
 from graphsql.config import settings
 
@@ -22,14 +22,8 @@ class DatabaseManager:
     
     def __init__(self) -> None:
         """Initialize the database engine, session factory, and models."""
-        connect_args = {}
-        
         # SQLite specific configuration
         if settings.is_sqlite:
-            connect_args = {
-                "check_same_thread": False,
-                "connect_args": {"timeout": 30}
-            }
             self.engine = create_engine(
                 settings.database_url,
                 connect_args={"check_same_thread": False},
@@ -60,7 +54,7 @@ class DatabaseManager:
                 for name in self.Base.classes.keys()
             }
         except Exception as e:
-            print(f"Warning: Could not prepare database models: {e}")
+            logger.warning("Could not prepare database models: {}", e)
             self._models = {}
         
         self.metadata = MetaData()

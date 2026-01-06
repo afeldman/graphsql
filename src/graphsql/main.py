@@ -1,11 +1,12 @@
 """Main FastAPI application."""
-import logging
+import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from loguru import logger
 
 from graphsql.config import settings
 from graphsql.database import db_manager
@@ -13,12 +14,9 @@ from graphsql.rest_routes import router as rest_router
 from graphsql.graphql_schema import create_graphql_schema
 
 
-# Configure logging
-logging.basicConfig(
-    level=getattr(logging, settings.log_level.upper()),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Configure loguru sink to mirror the requested log level early at import time.
+logger.remove()
+logger.add(sys.stderr, level=settings.log_level.upper(), enqueue=True, backtrace=True, diagnose=False)
 
 
 @asynccontextmanager
