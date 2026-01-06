@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
 .Python
 build/
 develop-eggs/
@@ -28,6 +34,7 @@ ENV/
 # UV
 .venv/
 .python-version
+.python_history
 
 # Environment variables
 .env
@@ -39,6 +46,16 @@ ENV/
 *.swp
 *.swo
 *~
+
+# Documentation
+docs/_build/
+
+# Coverage / reports
+htmlcov/
+
+# Packaging / installer leftovers
+pip-wheel-metadata/
+*.manifest
 
 # Database
 *.db
