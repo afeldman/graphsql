@@ -1,7 +1,7 @@
 """Utility functions."""
-from typing import Any, Dict
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
+from typing import Any, Dict
 
 
 def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -22,7 +22,7 @@ def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
     for key, value in data.items():
         if value is None:
             continue
-        
+
         if isinstance(value, (datetime, date)):
             cleaned[key] = value.isoformat()
         elif isinstance(value, Decimal):
@@ -31,5 +31,5 @@ def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
             cleaned[key] = value.decode('utf-8', errors='ignore')
         else:
             cleaned[key] = value
-    
+
     return cleaned

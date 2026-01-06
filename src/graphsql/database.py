@@ -1,10 +1,11 @@
 """Database connection and model management."""
 from typing import Any, Dict, Optional, Type
-from sqlalchemy import create_engine, MetaData, Table
+
+from loguru import logger
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
-from loguru import logger
 
 from graphsql.config import settings
 
@@ -19,7 +20,7 @@ class DatabaseManager:
         >>> db_manager.list_tables()  # doctest: +SKIP
         ['users', 'orders']
     """
-    
+
     def __init__(self) -> None:
         """Initialize the database engine, session factory, and models."""
         # SQLite specific configuration
@@ -38,13 +39,13 @@ class DatabaseManager:
                 max_overflow=20,
                 echo=settings.log_level == "DEBUG"
             )
-        
+
         self.SessionLocal = sessionmaker(
             autocommit=False,
             autoflush=False,
             bind=self.engine
         )
-        
+
         # Automatic model mapping
         self.Base = automap_base()
         try:
@@ -56,10 +57,10 @@ class DatabaseManager:
         except Exception as e:
             logger.warning("Could not prepare database models: {}", e)
             self._models = {}
-        
+
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.engine)
-    
+
     def get_session(self) -> Session:
         """Create a new SQLAlchemy session.
 
@@ -72,7 +73,7 @@ class DatabaseManager:
             ...     session.execute("SELECT 1")
         """
         return self.SessionLocal()
-    
+
     def get_model(self, table_name: str) -> Optional[Type[Any]]:
         """Return the mapped SQLAlchemy model for a table.
 
@@ -83,11 +84,11 @@ class DatabaseManager:
             The mapped model class, or ``None`` when the table is unknown.
         """
         return self._models.get(table_name)
-    
+
     def get_table(self, table_name: str) -> Optional[Table]:
         """Return the reflected SQLAlchemy ``Table`` for a name."""
         return self.metadata.tables.get(table_name)
-    
+
     def list_tables(self) -> list[str]:
         """List all available table names.
 
@@ -95,7 +96,7 @@ class DatabaseManager:
             All reflected table names known to the automapper.
         """
         return list(self._models.keys())
-    
+
     def get_table_info(self, table_name: str) -> Optional[Dict[str, Any]]:
         """Return column metadata for a table.
 
@@ -113,7 +114,7 @@ class DatabaseManager:
         table = self.get_table(table_name)
         if not table:
             return None
-        
+
         columns = []
         for column in table.columns:
             columns.append({
@@ -123,19 +124,19 @@ class DatabaseManager:
                 "primary_key": column.primary_key,
                 "default": str(column.default) if column.default else None,
             })
-        
+
         return {
             "name": table_name,
             "columns": columns,
             "primary_keys": [col.name for col in table.primary_key],
         }
-    
+
     def get_primary_key_column(self, table_name: str) -> Optional[str]:
         """Return the first primary key column name for a table."""
         model = self.get_model(table_name)
         if not model:
             return None
-        
+
         pk_columns = list(model.__table__.primary_key.columns)
         return pk_columns[0].name if pk_columns else None
 
@@ -166,13 +167,13 @@ def serialize_model(obj: Any) -> Dict[str, Any]:
         >>> serialize_model(record)  # doctest: +SKIP
         {'id': 1, 'created_at': '2024-01-01T12:00:00', 'name': 'Alice'}
     """
-    from datetime import datetime, date
+    from datetime import date, datetime
     from decimal import Decimal
-    
+
     result = {}
     for column in obj.__table__.columns:
         value = getattr(obj, column.name)
-        
+
         # Handle special types
         if isinstance(value, (datetime, date)):
             result[column.name] = value.isoformat()
@@ -182,5 +183,5 @@ def serialize_model(obj: Any) -> Dict[str, Any]:
             result[column.name] = value.decode('utf-8', errors='ignore')
         else:
             result[column.name] = value
-    
+
     return result

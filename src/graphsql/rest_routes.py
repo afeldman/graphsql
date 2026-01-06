@@ -1,12 +1,13 @@
 """REST API routes."""
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query as QueryParam
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Query as QueryParam
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, create_model
 
-from graphsql.database import db_manager, get_db, serialize_model
 from graphsql.config import settings
-
+from graphsql.database import db_manager, get_db, serialize_model
 
 router = APIRouter(prefix="/api", tags=["REST API"])
 
@@ -81,13 +82,13 @@ async def get_all_records(
     model = db_manager.get_model(table_name)
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
-    
+
     # Get total count
     total = db.query(model).count()
-    
+
     # Get paginated records
     records = db.query(model).offset(offset).limit(limit).all()
-    
+
     return PaginatedResponse(
         data=[serialize_model(record) for record in records],
         total=total,
@@ -123,16 +124,16 @@ async def get_record(
     model = db_manager.get_model(table_name)
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
-    
+
     pk_column = db_manager.get_primary_key_column(table_name)
     if not pk_column:
         raise HTTPException(status_code=400, detail="Table has no primary key")
-    
+
     record = db.query(model).filter(getattr(model, pk_column) == record_id).first()
-    
+
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
-    
+
     return serialize_model(record)
 
 
@@ -165,7 +166,7 @@ async def create_record(
     model = db_manager.get_model(table_name)
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
-    
+
     try:
         new_record = model(**data)
         db.add(new_record)
@@ -209,16 +210,16 @@ async def update_record(
     model = db_manager.get_model(table_name)
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
-    
+
     pk_column = db_manager.get_primary_key_column(table_name)
     if not pk_column:
         raise HTTPException(status_code=400, detail="Table has no primary key")
-    
+
     record = db.query(model).filter(getattr(model, pk_column) == record_id).first()
-    
+
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
-    
+
     try:
         for key, value in data.items():
             if hasattr(record, key):
@@ -267,16 +268,16 @@ async def delete_record(
     model = db_manager.get_model(table_name)
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
-    
+
     pk_column = db_manager.get_primary_key_column(table_name)
     if not pk_column:
         raise HTTPException(status_code=400, detail="Table has no primary key")
-    
+
     record = db.query(model).filter(getattr(model, pk_column) == record_id).first()
-    
+
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
-    
+
     try:
         db.delete(record)
         db.commit()

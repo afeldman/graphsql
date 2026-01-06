@@ -10,13 +10,18 @@ from loguru import logger
 
 from graphsql.config import settings
 from graphsql.database import db_manager
-from graphsql.rest_routes import router as rest_router
 from graphsql.graphql_schema import create_graphql_schema
-
+from graphsql.rest_routes import router as rest_router
 
 # Configure loguru sink to mirror the requested log level early at import time.
 logger.remove()
-logger.add(sys.stderr, level=settings.log_level.upper(), enqueue=True, backtrace=True, diagnose=False)
+logger.add(
+    sys.stderr,
+    level=settings.log_level.upper(),
+    enqueue=True,
+    backtrace=True,
+    diagnose=False,
+)
 
 
 @asynccontextmanager
@@ -33,9 +38,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting Auto API...")
     logger.info(f"Database: {settings.database_url.split('@')[-1]}")  # Hide credentials
     logger.info(f"Found {len(db_manager.list_tables())} tables")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Auto API...")
 
@@ -118,11 +123,14 @@ async def health_check() -> JSONResponse:
 # Include REST routes
 app.include_router(rest_router)
 
-# Include GraphQL routes
+# Include GraphQL routes only if tables are available
 try:
-    graphql_router = create_graphql_schema()
-    app.include_router(graphql_router, prefix="", tags=["GraphQL"])
-    logger.info("GraphQL endpoint created at /graphql")
+    if db_manager.list_tables():
+        graphql_router = create_graphql_schema()
+        app.include_router(graphql_router, prefix="", tags=["GraphQL"])
+        logger.info("GraphQL endpoint created at /graphql")
+    else:
+        logger.info("Skipping GraphQL endpoint creation: no tables found")
 except Exception as e:
     logger.error(f"Could not create GraphQL schema: {e}")
 
@@ -130,7 +138,7 @@ except Exception as e:
 def run() -> None:
     """Run the ASGI server with the configured settings."""
     import uvicorn
-    
+
     uvicorn.run(
         "auto_api.main:app",
         host=settings.api_host,

@@ -1,5 +1,4 @@
 """Fixtures and configuration for pytest."""
-import os
 from typing import Generator
 
 import pytest
@@ -7,7 +6,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from graphsql.database import DatabaseManager, get_session
 from graphsql.main import app
 
 
@@ -33,9 +31,9 @@ def db_session(test_db: str) -> Generator[Session, None, None]:
         A SQLAlchemy session object.
     """
     engine = create_engine(test_db, connect_args={"check_same_thread": False})
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-    session = SessionLocal()
+    session = session_local()
     yield session
     session.close()
 

@@ -10,7 +10,7 @@ def before_all(context):
     os.environ["API_HOST"] = "127.0.0.1"
     os.environ["API_PORT"] = "8000"
     os.environ["LOG_LEVEL"] = "WARNING"
-    
+
     # Get project root
     project_root = Path(__file__).parent.parent.parent
     context.project_root = project_root

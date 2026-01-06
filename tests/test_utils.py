@@ -1,8 +1,6 @@
 """Unit tests for utility functions."""
-from decimal import Decimal
 from datetime import datetime
-
-import pytest
+from decimal import Decimal
 
 from graphsql.utils import clean_dict
 
@@ -10,7 +8,7 @@ from graphsql.utils import clean_dict
 class TestCleanDict:
     """Test clean_dict data serialization function."""
 
-    def test_remove_none_values(self):
+    def test_remove_none_values(self) -> None:
         """Test that None values are removed."""
         data = {"name": "Alice", "email": None, "age": 30}
         result = clean_dict(data)
@@ -18,7 +16,7 @@ class TestCleanDict:
         assert result == {"name": "Alice", "age": 30}
         assert "email" not in result
 
-    def test_convert_datetime_to_iso(self):
+    def test_convert_datetime_to_iso(self) -> None:
         """Test datetime objects are converted to ISO format strings."""
         dt = datetime(2024, 1, 15, 10, 30, 0)
         data = {"created_at": dt, "name": "Alice"}
@@ -28,7 +26,7 @@ class TestCleanDict:
         assert "2024-01-15" in result["created_at"]
         assert result["name"] == "Alice"
 
-    def test_convert_decimal_to_float(self):
+    def test_convert_decimal_to_float(self) -> None:
         """Test Decimal objects are converted to floats."""
         data = {"price": Decimal("19.99"), "quantity": 5}
         result = clean_dict(data)
@@ -37,7 +35,7 @@ class TestCleanDict:
         assert result["price"] == 19.99
         assert result["quantity"] == 5
 
-    def test_decode_bytes(self):
+    def test_decode_bytes(self) -> None:
         """Test bytes are decoded to strings."""
         data = {"content": b"hello world", "name": "Alice"}
         result = clean_dict(data)
@@ -45,7 +43,7 @@ class TestCleanDict:
         assert isinstance(result["content"], str)
         assert result["content"] == "hello world"
 
-    def test_nested_dict_with_none_values(self):
+    def test_nested_dict_with_none_values(self) -> None:
         """Test nested dictionaries with None values."""
         data = {
             "user": {"name": "Alice", "email": None},
@@ -58,7 +56,7 @@ class TestCleanDict:
         assert "user" in result
         # Note: clean_dict may not recursively clean nested dicts
 
-    def test_mixed_types(self):
+    def test_mixed_types(self) -> None:
         """Test dictionary with mixed types."""
         dt = datetime(2024, 1, 15, 10, 30, 0)
         data = {
@@ -80,12 +78,12 @@ class TestCleanDict:
         assert "notes" not in result
         assert result["bio"] == "Software engineer"
 
-    def test_empty_dict(self):
+    def test_empty_dict(self) -> None:
         """Test empty dictionary."""
         result = clean_dict({})
         assert result == {}
 
-    def test_all_none_values(self):
+    def test_all_none_values(self) -> None:
         """Test dictionary with all None values."""
         data = {"a": None, "b": None, "c": None}
         result = clean_dict(data)

@@ -1,7 +1,5 @@
 """Unit tests for configuration module."""
-import os
-
-import pytest
+from typing import Any
 
 from graphsql.config import Settings
 
@@ -9,7 +7,7 @@ from graphsql.config import Settings
 class TestSettingsLoading:
     """Test Settings.load() method."""
 
-    def test_load_defaults(self, monkeypatch):
+    def test_load_defaults(self, monkeypatch: Any) -> None:
         """Test loading settings with minimal environment."""
         monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
 
@@ -21,7 +19,7 @@ class TestSettingsLoading:
         assert settings.api_reload is True
         assert settings.log_level == "INFO"
 
-    def test_load_with_custom_values(self, monkeypatch):
+    def test_load_with_custom_values(self, monkeypatch: Any) -> None:
         """Test loading settings with custom environment values."""
         monkeypatch.setenv("DATABASE_URL", "postgresql://localhost/graphsql")
         monkeypatch.setenv("API_HOST", "127.0.0.1")
@@ -37,7 +35,7 @@ class TestSettingsLoading:
         assert settings.api_reload is False
         assert settings.log_level == "DEBUG"
 
-    def test_load_cors_origins(self, monkeypatch):
+    def test_load_cors_origins(self, monkeypatch: Any) -> None:
         """Test parsing CORS origins from environment."""
         monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
         monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080")
@@ -46,7 +44,7 @@ class TestSettingsLoading:
 
         assert settings.cors_origins == ["http://localhost:3000", "http://localhost:8080"]
 
-    def test_database_type_detection_sqlite(self, monkeypatch):
+    def test_database_type_detection_sqlite(self, monkeypatch: Any) -> None:
         """Test SQLite database type detection."""
         monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
 
@@ -56,7 +54,7 @@ class TestSettingsLoading:
         assert settings.is_postgres is False
         assert settings.is_mysql is False
 
-    def test_database_type_detection_postgres(self, monkeypatch):
+    def test_database_type_detection_postgres(self, monkeypatch: Any) -> None:
         """Test PostgreSQL database type detection."""
         monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@localhost/db")
 
@@ -66,7 +64,7 @@ class TestSettingsLoading:
         assert settings.is_postgres is True
         assert settings.is_mysql is False
 
-    def test_database_type_detection_mysql(self, monkeypatch):
+    def test_database_type_detection_mysql(self, monkeypatch: Any) -> None:
         """Test MySQL database type detection."""
         monkeypatch.setenv("DATABASE_URL", "mysql+pymysql://user:pass@localhost/db")
 
@@ -76,7 +74,7 @@ class TestSettingsLoading:
         assert settings.is_postgres is False
         assert settings.is_mysql is True
 
-    def test_auth_settings(self, monkeypatch):
+    def test_auth_settings(self, monkeypatch: Any) -> None:
         """Test authentication settings."""
         monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
         monkeypatch.setenv("ENABLE_AUTH", "true")
@@ -87,7 +85,7 @@ class TestSettingsLoading:
         assert settings.enable_auth is True
         assert settings.api_key == "secret-key-123"
 
-    def test_pagination_settings(self, monkeypatch):
+    def test_pagination_settings(self, monkeypatch: Any) -> None:
         """Test pagination settings."""
         monkeypatch.setenv("DATABASE_URL", "sqlite:///test.db")
         monkeypatch.setenv("DEFAULT_PAGE_SIZE", "100")
