@@ -10,6 +10,7 @@ from graphsql.config import settings
 from graphsql.database import db_manager, get_db, serialize_model
 from graphsql.rate_limit import limiter
 from graphsql.cache import cache_get, cache_set
+from graphsql.events import publish_change
 
 router = APIRouter(prefix="/api", tags=["REST API"])
 
@@ -195,6 +196,7 @@ async def create_record(
         db.add(new_record)
         db.commit()
         db.refresh(new_record)
+        await publish_change(table_name, "created", serialize_model(new_record))
         return serialize_model(new_record)
     except Exception as e:
         db.rollback()
@@ -249,6 +251,7 @@ async def update_record(
                 setattr(record, key, value)
         db.commit()
         db.refresh(record)
+        await publish_change(table_name, "updated", serialize_model(record))
         return serialize_model(record)
     except Exception as e:
         db.rollback()
@@ -302,8 +305,10 @@ async def delete_record(
         raise HTTPException(status_code=404, detail="Record not found")
 
     try:
+        serialized = serialize_model(record)
         db.delete(record)
         db.commit()
+        await publish_change(table_name, "deleted", serialized)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))

@@ -17,6 +17,7 @@ from graphsql.database import db_manager
 from graphsql.graphql_schema import create_graphql_schema
 from graphsql.rate_limit import limiter
 from graphsql.rest_routes import router as rest_router
+from graphsql.websocket_routes import router as websocket_router
 
 # Configure loguru sink to mirror the requested log level early at import time.
 logger.remove()
@@ -135,6 +136,9 @@ app.include_router(rest_router)
 
 # Include Auth routes
 app.include_router(auth_router)
+
+# Include WebSocket routes
+app.include_router(websocket_router)
 
 # Include GraphQL routes only if tables are available
 try:

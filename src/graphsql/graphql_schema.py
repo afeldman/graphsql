@@ -7,6 +7,7 @@ from strawberry.fastapi import GraphQLRouter
 
 from graphsql.config import settings
 from graphsql.database import db_manager, get_db, serialize_model
+from graphsql.events import publish_change
 
 
 def create_graphql_schema() -> GraphQLRouter:
@@ -74,8 +75,8 @@ def create_graphql_schema() -> GraphQLRouter:
         pk_column = db_manager.get_primary_key_column(table_name)
 
         # Single record query
-        def make_single_resolver(model_class: Any, pk_col: str, tbl_name: str) -> Any:
-            def resolver(id: int, info: Any) -> Optional[Any]:
+        def make_single_resolver(model_class: Any, pk_col: str, tbl_name: str, table_type: Any) -> Any:
+            def resolver(id: int, info: Any) -> Optional[table_type]:
                 db: Session = next(get_db())
                 try:
                     record = db.query(model_class).filter(
@@ -88,7 +89,7 @@ def create_graphql_schema() -> GraphQLRouter:
                     data = serialize_model(record)
                     # Create instance of the type
                     type_class = table_types[tbl_name]
-                    instance = type_class.__class__.__new__(type_class.__class__)
+                    instance = type_class()
                     for key, value in data.items():
                         setattr(instance, key, value)
                     return instance
@@ -98,12 +99,12 @@ def create_graphql_schema() -> GraphQLRouter:
             return resolver
 
         # List query
-        def make_list_resolver(model_class: Any, tbl_name: str) -> Any:
+        def make_list_resolver(model_class: Any, tbl_name: str, table_type: Any) -> Any:
             def resolver(
                 limit: int = settings.default_page_size,
                 offset: int = 0,
                 info: Any = None
-            ) -> List[Any]:
+            ) -> List[table_type]:
                 db: Session = next(get_db())
                 try:
                     records = db.query(model_class).offset(offset).limit(
@@ -114,7 +115,7 @@ def create_graphql_schema() -> GraphQLRouter:
                     for record in records:
                         data = serialize_model(record)
                         type_class = table_types[tbl_name]
-                        instance = type_class.__class__.__new__(type_class.__class__)
+                        instance = type_class()
                         for key, value in data.items():
                             setattr(instance, key, value)
                         result.append(instance)
@@ -126,21 +127,18 @@ def create_graphql_schema() -> GraphQLRouter:
 
         if pk_column:
             query_fields[table_name] = strawberry.field(
-                resolver=make_single_resolver(model, pk_column, table_name)
+                resolver=make_single_resolver(model, pk_column, table_name, table_type)
             )
 
         query_fields[f"all_{table_name}"] = strawberry.field(
-            resolver=make_list_resolver(model, table_name)
+            resolver=make_list_resolver(model, table_name, table_type)
         )
 
-    # Create the Query type
-    @strawberry.type
-    class Query:
-        pass
+    if not query_fields:
+        query_fields["health"] = strawberry.field(lambda: "ok")
 
-    # Add fields to Query
-    for field_name, field_obj in query_fields.items():
-        setattr(Query, field_name, field_obj)
+    # Create the Query type dynamically with collected fields
+    Query = strawberry.type(type("Query", (), query_fields))
 
     # Create Mutation class
     mutation_fields = {}
@@ -168,7 +166,7 @@ def create_graphql_schema() -> GraphQLRouter:
                 input_fields[column.name] = field_type
 
         # Create Input type
-        strawberry.input(
+        input_type = strawberry.input(
             type(
                 f"{table_name.capitalize()}Input",
                 (),
@@ -180,8 +178,8 @@ def create_graphql_schema() -> GraphQLRouter:
         )
 
         # Create mutation
-        def make_create_mutation(model_class: Any, tbl_name: str) -> Any:
-            def mutation(data: Any, info: Any) -> Any:
+        def make_create_mutation(model_class: Any, tbl_name: str, table_type: Any, input_type: Any) -> Any:
+            async def mutation(data: input_type, info: Any) -> table_type:
                 db: Session = next(get_db())
                 try:
                     # Convert Strawberry input to dict
@@ -196,8 +194,11 @@ def create_graphql_schema() -> GraphQLRouter:
                     db.refresh(new_record)
 
                     result_data = serialize_model(new_record)
+
+                    await publish_change(tbl_name, "created", result_data)
+
                     type_class = table_types[tbl_name]
-                    instance = type_class.__class__.__new__(type_class.__class__)
+                    instance = type_class()
                     for key, value in result_data.items():
                         setattr(instance, key, value)
                     return instance
@@ -210,17 +211,14 @@ def create_graphql_schema() -> GraphQLRouter:
             return mutation
 
         mutation_fields[f"create_{table_name}"] = strawberry.mutation(
-            resolver=make_create_mutation(model, table_name)
+            resolver=make_create_mutation(model, table_name, table_type, input_type)
         )
 
-    # Create Mutation type
-    @strawberry.type
-    class Mutation:
-        pass
+    if not mutation_fields:
+        mutation_fields["noop"] = strawberry.mutation(lambda: "ok")
 
-    # Add fields to Mutation
-    for field_name, field_obj in mutation_fields.items():
-        setattr(Mutation, field_name, field_obj)
+    # Create Mutation type dynamically with collected fields
+    Mutation = strawberry.type(type("Mutation", (), mutation_fields))
 
     # Create schema
     schema = strawberry.Schema(query=Query, mutation=Mutation)
