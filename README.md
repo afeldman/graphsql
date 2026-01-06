@@ -79,7 +79,7 @@ docker-compose up
 
 ### System Requirements
 
-- **Python:** 3.11 or 3.12
+- **Python:** 3.7 or higher (tested with 3.7, 3.8, 3.9, 3.10, 3.11, 3.12)
 - **Database:** PostgreSQL 12+, MySQL 8+, or SQLite 3.9+
 - **Docker:** 20.10+ (for containerized deployment)
 - **Kubernetes:** 1.20+ (for orchestrated deployment)

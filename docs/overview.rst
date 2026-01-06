@@ -24,6 +24,6 @@ Getting started
 
 3. Run the application::
 
-      uv run auto-api
+      graphsql-start
 
 4. Explore the REST API at ``/docs`` and GraphQL at ``/graphql``.
