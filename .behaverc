@@ -1,0 +1,22 @@
+[behave]
+# Behave configuration for GraphSQL BDD tests
+
+# Paths
+paths = features
+output = -
+
+# Format for output
+format = progress
+# Other formats: pretty, json, html
+
+# Stop after first failure
+#stop = true
+
+# Dry run (parse but don't execute)
+# dry_run = false
+
+# Print undefined steps
+# no_skips = true
+
+# Logging
+logging_level = WARNING
