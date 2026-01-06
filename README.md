@@ -1,35 +1,40 @@
-# Auto API
+# GraphSQL
 
-Automatische REST und GraphQL API für beliebige Datenbanken mit FastAPI, SQLAlchemy und Strawberry GraphQL.
+Automatic REST and GraphQL API for any relational database using FastAPI, SQLAlchemy, and Strawberry GraphQL.
 
 ## Features
 
-- ✅ Automatische REST API für alle Datenbanktabellen
-- ✅ Automatische GraphQL API
-- ✅ Unterstützung für PostgreSQL, MySQL und SQLite
-- ✅ CRUD Operationen
+- ✅ Automatic REST API for all database tables
+- ✅ Automatic GraphQL API
+- ✅ Supports PostgreSQL, MySQL, and SQLite
+- ✅ CRUD operations
 - ✅ Pagination
-- ✅ Automatische API-Dokumentation (Swagger/ReDoc)
+- ✅ Automatic API documentation (Swagger/ReDoc)
 - ✅ GraphQL Playground
-- ✅ Konfiguration über .env
-- ✅ Modern mit UV und Hatchling
+- ✅ Configuration via .env
+- ✅ Modern stack with UV and Hatchling
 
 ## Installation
 
-### Mit UV (empfohlen)
+### With UV (recommended)
 
 ```bash
-# UV installieren
+# Install UV
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Projekt setup
+# Project setup
 uv venv
 source .venv/bin/activate  # Linux/Mac
-# oder
+# or
 .venv\Scripts\activate  # Windows
 
-# Dependencies installieren
+# Install dependencies
 uv pip install -e .
 
-# Für Development
+# For development
 uv pip install -e ".[dev]"
+```
+
+## License
+
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
