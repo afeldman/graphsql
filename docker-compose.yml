@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database (optional - for testing)
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: graphsql
+      POSTGRES_USER: graphsql
+      POSTGRES_PASSWORD: graphsql_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graphsql"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - with-db
+
+  # GraphSQL API
+  graphsql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graphsql-api
+    environment:
+      DATABASE_URL: sqlite:///./data/database.db
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_RELOAD: "true"
+      CORS_ORIGINS: "*"
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    depends_on:
+      - postgres
+    profiles:
+      - with-db
+    command: >
+      sh -c "python -m uvicorn graphsql.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # GraphSQL API (without database)
+  graphsql-standalone:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graphsql-standalone
+    environment:
+      DATABASE_URL: sqlite:///./data/database.db
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_RELOAD: "true"
+      CORS_ORIGINS: "*"
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    command: >
+      sh -c "python -m uvicorn graphsql.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:

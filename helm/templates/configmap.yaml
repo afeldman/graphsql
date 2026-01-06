@@ -1,0 +1,16 @@
+{{- if .Values.configMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "graphsql.configMapName" . }}
+  labels:
+    {{- include "graphsql.labels" . | nindent 4 }}
+data:
+  API_HOST: {{ .Values.config.apiHost | quote }}
+  API_PORT: {{ .Values.config.apiPort | quote }}
+  API_RELOAD: {{ .Values.config.apiReload | quote }}
+  CORS_ORIGINS: {{ .Values.config.corsOrigins | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  DEFAULT_PAGE_SIZE: {{ .Values.config.defaultPageSize | quote }}
+  MAX_PAGE_SIZE: {{ .Values.config.maxPageSize | quote }}
+{{- end }}

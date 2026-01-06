@@ -1,0 +1,28 @@
+apiVersion: v2
+name: graphsql
+description: Automatic REST and GraphQL API for any relational database
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+keywords:
+  - graphql
+  - rest
+  - api
+  - database
+  - fastapi
+  - sqlalchemy
+
+home: https://github.com/afeldman/graphsql
+sources:
+  - https://github.com/afeldman/graphsql
+
+maintainers:
+  - name: Anton Feldmann
+    email: anton.feldmann@gmail.com
+    url: https://github.com/afeldman
+
+dependencies: []
+
+annotations:
+  category: Database
