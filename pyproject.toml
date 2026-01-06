@@ -53,6 +53,8 @@ Repository = "https://github.com/afeldman/graphsql"
 
 [project.scripts]
 auto-api = "graphsql.main:run"
+graphsql = "graphsql.main:run"
+graphsql-start = "graphsql.main:run"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/graphsql"]
