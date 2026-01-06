@@ -1,14 +1,14 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { requireAuth, getAuthUser, getAuthToken } from "../lib/auth.ts";
+import { getAuthToken, requireAuth } from "../lib/auth.ts";
 import { getClient } from "../lib/api.ts";
 import Layout from "../components/Layout.tsx";
 import StatsCard from "../components/StatsCard.tsx";
 
 interface DashboardData {
-  user: any;
-  stats: any;
+  user: Record<string, unknown>;
+  stats: Record<string, unknown>;
   tables: string[];
-  health: any;
+  health: Record<string, unknown>;
 }
 
 export const handler: Handlers<DashboardData> = {
@@ -25,7 +25,7 @@ export const handler: Handlers<DashboardData> = {
       ]);
 
       return await ctx.render({ user, stats, tables, health });
-    } catch (error) {
+    } catch (_error) {
       return new Response("", {
         status: 302,
         headers: { Location: "/login" },
@@ -77,14 +77,20 @@ export default function Dashboard({ data }: PageProps<DashboardData>) {
             </div>
           </a>
 
-          <a href="/tables?view=graphql" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+          <a
+            href="/tables?view=graphql"
+            class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow"
+          >
             <div class="card-body">
               <h2 class="card-title">🎮 GraphQL Playground</h2>
               <p>Execute GraphQL queries</p>
             </div>
           </a>
 
-          <a href="/monitoring" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+          <a
+            href="/monitoring"
+            class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow"
+          >
             <div class="card-body">
               <h2 class="card-title">📈 Monitoring</h2>
               <p>Real-time system monitoring</p>

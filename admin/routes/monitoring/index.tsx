@@ -1,10 +1,10 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
 import LiveFeed from "../../islands/LiveFeed.tsx";
-import { requireAuth, getAuthUser } from "../../lib/auth.ts";
+import { requireAuth } from "../../lib/auth.ts";
 
 interface MonitoringData {
-  user: any;
+  user: Record<string, unknown>;
 }
 
 export const handler: Handlers<MonitoringData> = {

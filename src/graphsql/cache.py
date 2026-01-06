@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 from redis.asyncio import Redis
 
 from graphsql.config import settings
 
-
-_redis_client: Optional[Redis] = None
+_redis_client: Redis | None = None
 
 
 async def get_redis() -> Redis:
@@ -34,7 +33,7 @@ async def close_redis() -> None:
         _redis_client = None
 
 
-async def cache_get(key: str) -> Optional[Any]:
+async def cache_get(key: str) -> Any | None:
     """Retrieve a cached value by key.
 
     Returns None on cache miss or connection issues.
@@ -50,7 +49,7 @@ async def cache_get(key: str) -> Optional[Any]:
         return None
 
 
-async def cache_set(key: str, value: Any, ttl: Optional[int] = None) -> None:
+async def cache_set(key: str, value: Any, ttl: int | None = None) -> None:
     """Store a value in cache with optional TTL."""
     try:
         client = await get_redis()
@@ -72,7 +71,7 @@ async def cache_delete(key: str) -> None:
         logger.debug(f"Cache delete failed for key {key}: {exc}")
 
 
-async def session_create(session_id: str, data: dict, ttl: Optional[int] = None) -> None:
+async def session_create(session_id: str, data: dict, ttl: int | None = None) -> None:
     """Create a session stored in Redis."""
     try:
         client = await get_redis()
@@ -85,7 +84,7 @@ async def session_create(session_id: str, data: dict, ttl: Optional[int] = None)
         logger.debug(f"Session create failed for {session_id}: {exc}")
 
 
-async def session_get(session_id: str) -> Optional[dict]:
+async def session_get(session_id: str) -> dict | None:
     """Fetch a session payload from Redis."""
     try:
         client = await get_redis()

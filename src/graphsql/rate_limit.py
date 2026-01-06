@@ -1,8 +1,8 @@
 """Rate limiting configuration and middleware."""
 
+from loguru import logger
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from loguru import logger
 
 from graphsql.config import settings
 

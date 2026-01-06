@@ -1,5 +1,6 @@
 """Database connection and model management."""
-from typing import Any, Dict, Optional, Type
+
+from typing import Any
 
 from loguru import logger
 from sqlalchemy import MetaData, Table, create_engine
@@ -29,7 +30,7 @@ class DatabaseManager:
                 settings.database_url,
                 connect_args={"check_same_thread": False},
                 poolclass=StaticPool,
-                echo=settings.log_level == "DEBUG"
+                echo=settings.log_level == "DEBUG",
             )
         else:
             self.engine = create_engine(
@@ -37,22 +38,17 @@ class DatabaseManager:
                 pool_pre_ping=True,
                 pool_size=10,
                 max_overflow=20,
-                echo=settings.log_level == "DEBUG"
+                echo=settings.log_level == "DEBUG",
             )
 
-        self.SessionLocal = sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=self.engine
-        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
         # Automatic model mapping
         self.Base = automap_base()
         try:
             self.Base.prepare(autoload_with=self.engine, reflect=True)
-            self._models: Dict[str, Any] = {
-                name: getattr(self.Base.classes, name)
-                for name in self.Base.classes.keys()
+            self._models: dict[str, Any] = {
+                name: getattr(self.Base.classes, name) for name in self.Base.classes.keys()
             }
         except Exception as e:
             logger.warning("Could not prepare database models: {}", e)
@@ -74,7 +70,7 @@ class DatabaseManager:
         """
         return self.SessionLocal()
 
-    def get_model(self, table_name: str) -> Optional[Type[Any]]:
+    def get_model(self, table_name: str) -> type[Any] | None:
         """Return the mapped SQLAlchemy model for a table.
 
         Args:
@@ -85,7 +81,7 @@ class DatabaseManager:
         """
         return self._models.get(table_name)
 
-    def get_table(self, table_name: str) -> Optional[Table]:
+    def get_table(self, table_name: str) -> Table | None:
         """Return the reflected SQLAlchemy ``Table`` for a name."""
         return self.metadata.tables.get(table_name)
 
@@ -97,7 +93,7 @@ class DatabaseManager:
         """
         return list(self._models.keys())
 
-    def get_table_info(self, table_name: str) -> Optional[Dict[str, Any]]:
+    def get_table_info(self, table_name: str) -> dict[str, Any] | None:
         """Return column metadata for a table.
 
         Args:
@@ -117,13 +113,15 @@ class DatabaseManager:
 
         columns = []
         for column in table.columns:
-            columns.append({
-                "name": column.name,
-                "type": str(column.type),
-                "nullable": column.nullable,
-                "primary_key": column.primary_key,
-                "default": str(column.default) if column.default else None,
-            })
+            columns.append(
+                {
+                    "name": column.name,
+                    "type": str(column.type),
+                    "nullable": column.nullable,
+                    "primary_key": column.primary_key,
+                    "default": str(column.default) if column.default else None,
+                }
+            )
 
         return {
             "name": table_name,
@@ -131,7 +129,7 @@ class DatabaseManager:
             "primary_keys": [col.name for col in table.primary_key],
         }
 
-    def get_primary_key_column(self, table_name: str) -> Optional[str]:
+    def get_primary_key_column(self, table_name: str) -> str | None:
         """Return the first primary key column name for a table."""
         model = self.get_model(table_name)
         if not model:
@@ -154,7 +152,7 @@ def get_db() -> Session:
         db.close()
 
 
-def serialize_model(obj: Any) -> Dict[str, Any]:
+def serialize_model(obj: Any) -> dict[str, Any]:
     """Serialize a SQLAlchemy model instance.
 
     Args:
@@ -180,7 +178,7 @@ def serialize_model(obj: Any) -> Dict[str, Any]:
         elif isinstance(value, Decimal):
             result[column.name] = float(value)
         elif isinstance(value, bytes):
-            result[column.name] = value.decode('utf-8', errors='ignore')
+            result[column.name] = value.decode("utf-8", errors="ignore")
         else:
             result[column.name] = value
 

@@ -1,7 +1,8 @@
 """Tests for JWT authentication module."""
 
-import pytest
 from datetime import timedelta
+
+import pytest
 from fastapi import HTTPException, status
 
 from graphsql.auth import (

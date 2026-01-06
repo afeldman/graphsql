@@ -1,6 +1,6 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { getClient } from "../lib/api.ts";
-import { setAuthCookies, getAuthUser } from "../lib/auth.ts";
+import { getAuthUser, setAuthCookies } from "../lib/auth.ts";
 
 export const handler: Handlers = {
   async GET(req, ctx) {
@@ -36,7 +36,7 @@ export const handler: Handlers = {
         status: 302,
         headers,
       });
-    } catch (error) {
+    } catch (_error) {
       return await ctx.render({ error: "Invalid credentials" });
     }
   },
@@ -50,7 +50,7 @@ export default function Login({ data }: PageProps) {
           <h2 class="card-title text-2xl font-bold text-center">
             GraphSQL Admin
           </h2>
-          
+
           {data?.error && (
             <div class="alert alert-error">
               <span>{data.error}</span>

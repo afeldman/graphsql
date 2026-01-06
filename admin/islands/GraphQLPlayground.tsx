@@ -30,7 +30,11 @@ export default function GraphQLPlayground({ token }: Props) {
       <div class="card-body space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="card-title">GraphQL Playground</h2>
-          <button class={`btn btn-primary btn-sm ${loading ? "loading" : ""}`} onClick={runQuery}>
+          <button
+            type="button"
+            class={`btn btn-primary btn-sm ${loading ? "loading" : ""}`}
+            onClick={runQuery}
+          >
             Run
           </button>
         </div>
@@ -48,8 +52,8 @@ export default function GraphQLPlayground({ token }: Props) {
 }
 
 function getBaseUrl(): string {
-  const fromEnv = (globalThis as any)?.Deno?.env?.get?.("GRAPHSQL_URL");
+  const fromEnv = (globalThis as Record<string, unknown>)?.Deno?.env?.get?.("GRAPHSQL_URL");
   if (fromEnv) return fromEnv;
-  const { origin } = window.location;
+  const { origin } = globalThis.location as { origin: string };
   return origin.replace(/\/admin$/, "") || origin;
 }

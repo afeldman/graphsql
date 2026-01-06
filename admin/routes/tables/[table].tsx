@@ -6,7 +6,7 @@ import TableBrowser from "../../islands/TableBrowser.tsx";
 import type { TableInfo } from "../../lib/types.ts";
 
 interface TableDetailData {
-  user: any;
+  user: Record<string, unknown>;
   table: string;
   rows: Record<string, unknown>[];
   info: TableInfo | null;

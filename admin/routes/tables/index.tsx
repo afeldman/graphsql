@@ -5,7 +5,7 @@ import { getAuthToken, requireAuth } from "../../lib/auth.ts";
 import GraphQLPlayground from "../../islands/GraphQLPlayground.tsx";
 
 interface TablesPageData {
-  user: any;
+  user: Record<string, unknown>;
   tables: string[];
   view: string;
   token?: string;
@@ -34,10 +34,16 @@ export default function TablesPage({ data }: PageProps<TablesPageData>) {
         <div class="flex justify-between items-center">
           <h1 class="text-3xl font-bold">Tables</h1>
           <div class="join">
-            <a href="/tables" class={`btn join-item ${data.view === "list" ? "btn-primary" : "btn-ghost"}`}>
+            <a
+              href="/tables"
+              class={`btn join-item ${data.view === "list" ? "btn-primary" : "btn-ghost"}`}
+            >
               List
             </a>
-            <a href="/tables?view=graphql" class={`btn join-item ${data.view === "graphql" ? "btn-primary" : "btn-ghost"}`}>
+            <a
+              href="/tables?view=graphql"
+              class={`btn join-item ${data.view === "graphql" ? "btn-primary" : "btn-ghost"}`}
+            >
               GraphQL
             </a>
           </div>
@@ -47,7 +53,8 @@ export default function TablesPage({ data }: PageProps<TablesPageData>) {
           ? (
             <div class="grid grid-cols-1 gap-4">
               <div class="alert alert-info text-sm">
-                Authenticated GraphQL requests are proxied to the GraphSQL backend. Adjust the query and run.
+                Authenticated GraphQL requests are proxied to the GraphSQL backend. Adjust the query
+                and run.
               </div>
               <GraphQLPlayground token={data.token} />
             </div>
@@ -55,7 +62,11 @@ export default function TablesPage({ data }: PageProps<TablesPageData>) {
           : (
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.tables.map((table) => (
-                <a key={table} href={`/tables/${table}`} class="card bg-base-100 shadow hover:shadow-lg">
+                <a
+                  key={table}
+                  href={`/tables/${table}`}
+                  class="card bg-base-100 shadow hover:shadow-lg"
+                >
                   <div class="card-body">
                     <h2 class="card-title font-mono">{table}</h2>
                     <p class="text-sm text-base-content/70">View records and schema</p>

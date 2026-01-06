@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from .auth import create_access_token, TokenResponse
+from .auth import TokenResponse, create_access_token
 from .cache import session_create
 
 router = APIRouter(prefix="/auth", tags=["authentication"])

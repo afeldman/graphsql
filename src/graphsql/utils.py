@@ -1,10 +1,11 @@
 """Utility functions."""
+
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 
-def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
+def clean_dict(data: dict[str, Any]) -> dict[str, Any]:
     """Remove ``None`` values and normalize common Python types.
 
     Args:
@@ -28,7 +29,7 @@ def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
         elif isinstance(value, Decimal):
             cleaned[key] = float(value)
         elif isinstance(value, bytes):
-            cleaned[key] = value.decode('utf-8', errors='ignore')
+            cleaned[key] = value.decode("utf-8", errors="ignore")
         else:
             cleaned[key] = value
 

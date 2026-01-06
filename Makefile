@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-unit test-bdd test-coverage test-watch lint type-check format clean docker-build docker-run serve inspect
+.PHONY: help install dev test test-unit test-bdd test-coverage test-watch lint type-check format clean docker-build docker-run serve inspect quality deno-lint deno-fmt docs
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -40,9 +40,23 @@ lint: ## Run linters
 type-check: ## Type checking with mypy
 	mypy src/
 
-format: ## Format code
+deno-lint: ## Lint TypeScript/Fresh admin
+	deno lint admin
+
+deno-fmt: ## Format TypeScript/Fresh admin
+	deno fmt admin
+
+format: ## Format code (Python + TypeScript)
 	black src/
 	ruff check src/ --fix
+	deno fmt admin
+
+docs: ## Build Sphinx documentation
+	sphinx-build -b html docs docs/_build
+	@echo "📚 Documentation built in docs/_build/"
+
+quality: lint deno-lint test docs ## Run complete quality check (lint, test, docs)
+	@echo "✅ Quality check passed!"
 
 clean: ## Clean build artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

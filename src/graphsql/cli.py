@@ -1,10 +1,10 @@
 """Command Line Interface powered by Typer."""
+
 import json
 import os
 import sys
 import webbrowser
 from pathlib import Path
-from typing import Optional
 
 import typer
 import uvicorn
@@ -48,7 +48,7 @@ def server(
         "-l",
         help="Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
     ),
-    database_url: Optional[str] = typer.Option(
+    database_url: str | None = typer.Option(
         None,
         "--database-url",
         "-d",
@@ -56,28 +56,28 @@ def server(
     ),
 ) -> None:
     """Start the GraphQL/REST API server.
-    
+
     Examples:
         Start with defaults:
             graphsql server
-        
+
         Start with custom host/port:
             graphsql server --host 127.0.0.1 --port 9000
-        
+
         Enable debug logging:
             graphsql server --log-level DEBUG
     """
     # Override environment if provided
     if database_url:
         os.environ["DATABASE_URL"] = database_url
-    
-    console.print(f"🚀 Starting GraphSQL API server...")
+
+    console.print("🚀 Starting GraphSQL API server...")
     console.print(f"   Host: [bold cyan]{host}[/bold cyan]")
     console.print(f"   Port: [bold cyan]{port}[/bold cyan]")
     console.print(f"   Reload: [bold cyan]{'enabled' if reload else 'disabled'}[/bold cyan]")
     console.print(f"   Log Level: [bold cyan]{log_level}[/bold cyan]")
     console.print()
-    
+
     try:
         uvicorn.run(
             "graphsql.main:app",
@@ -96,7 +96,7 @@ def server(
 
 @app.command()
 def inspect(
-    database_url: Optional[str] = typer.Option(
+    database_url: str | None = typer.Option(
         None,
         "--database-url",
         "-d",
@@ -105,34 +105,34 @@ def inspect(
     ),
 ) -> None:
     """Inspect and display database structure.
-    
+
     Shows all tables, columns, types, and primary keys.
     """
     if not database_url:
         database_url = settings.database_url
-    
+
     with console.status("[bold green]Connecting to database..."):
         try:
             # Temporary database manager
             os.environ["DATABASE_URL"] = database_url
             db_manager = DatabaseManager()
             tables = db_manager.list_tables()
-            
+
             console.print()
-            console.print(f"✅ Connected successfully!", style="bold green")
+            console.print("✅ Connected successfully!", style="bold green")
             console.print(f"Found [bold]{len(tables)}[/bold] tables\n")
-            
+
             for table_name in tables:
                 info = db_manager.get_table_info(table_name)
                 if not info:
                     continue
-                
+
                 table = Table(title=f"📊 {table_name}")
                 table.add_column("Column", style="cyan")
                 table.add_column("Type", style="magenta")
                 table.add_column("Nullable", style="yellow")
                 table.add_column("PK", style="green")
-                
+
                 for col in info["columns"]:
                     table.add_row(
                         col["name"],
@@ -140,10 +140,10 @@ def inspect(
                         "✓" if col["nullable"] else "✗",
                         "✓" if col["primary_key"] else "",
                     )
-                
+
                 console.print(table)
                 console.print()
-                
+
         except Exception as e:
             console.print(f"❌ Error: {e}", style="bold red")
             sys.exit(1)
@@ -189,9 +189,9 @@ MAX_PAGE_SIZE=1000
 # Logging
 LOG_LEVEL=INFO
 """
-    
+
     output_path = Path(output)
-    
+
     if output_path.exists():
         console.print(f"⚠️  File [bold]{output}[/bold] already exists.")
         if typer.confirm("Overwrite?"):
@@ -203,7 +203,7 @@ LOG_LEVEL=INFO
     else:
         output_path.write_text(env_content)
         console.print(f"✅ Created {output}", style="bold green")
-    
+
     console.print()
     console.print("📝 Next steps:")
     console.print("1. Edit [bold].env[/bold] and set your [bold]DATABASE_URL[/bold]")
@@ -222,15 +222,17 @@ def export_openapi(
 ) -> None:
     """Export OpenAPI/Swagger schema to a JSON file."""
     from graphsql.main import app
-    
+
     with console.status("[bold green]Exporting OpenAPI schema..."):
         try:
             schema = app.openapi()
-            
+
             with open(output, "w") as f:
                 json.dump(schema, f, indent=2)
-            
-            console.print(f"✅ OpenAPI schema exported to [bold]{output}[/bold]", style="bold green")
+
+            console.print(
+                f"✅ OpenAPI schema exported to [bold]{output}[/bold]", style="bold green"
+            )
         except Exception as e:
             console.print(f"❌ Error: {e}", style="bold red")
             sys.exit(1)

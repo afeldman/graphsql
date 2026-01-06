@@ -1,16 +1,16 @@
 """WebSocket endpoints for streaming change events."""
+
 from __future__ import annotations
 
 import json
-from typing import List, Optional
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, status
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, status
 from loguru import logger
 
-from graphsql.cache import get_redis
-from graphsql.events import build_channel
 from graphsql.auth import verify_token
+from graphsql.cache import get_redis
 from graphsql.config import settings
+from graphsql.events import build_channel
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -18,7 +18,7 @@ router = APIRouter(tags=["WebSocket"])
 POLICY_VIOLATION = status.WS_1008_POLICY_VIOLATION
 
 
-async def _authenticate(websocket: WebSocket) -> Optional[str]:
+async def _authenticate(websocket: WebSocket) -> str | None:
     """Authenticate a WebSocket connection when auth is enabled."""
     if not settings.enable_auth:
         return None
@@ -45,22 +45,24 @@ async def _authenticate(websocket: WebSocket) -> Optional[str]:
         return None
 
 
-async def _stream_messages(websocket: WebSocket, table_name: Optional[str]) -> None:
+async def _stream_messages(websocket: WebSocket, table_name: str | None) -> None:
     """Subscribe to Redis channels and forward messages to the client."""
     client = await get_redis()
     pubsub = client.pubsub()
 
-    channels: List[str] = [build_channel(None)]
+    channels: list[str] = [build_channel(None)]
     if table_name:
         channels.append(build_channel(table_name))
 
     await pubsub.subscribe(*channels)
     await websocket.accept()
-    await websocket.send_json({
-        "type": "welcome",
-        "channels": channels,
-        "table": table_name,
-    })
+    await websocket.send_json(
+        {
+            "type": "welcome",
+            "channels": channels,
+            "table": table_name,
+        }
+    )
 
     try:
         async for message in pubsub.listen():

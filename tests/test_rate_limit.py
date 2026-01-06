@@ -1,6 +1,5 @@
 """Tests for rate limiting functionality."""
 
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 

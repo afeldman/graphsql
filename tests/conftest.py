@@ -1,5 +1,6 @@
 """Fixtures and configuration for pytest."""
-from typing import Generator
+
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -70,17 +71,20 @@ def sample_db(db_session: Session) -> Session:
         Database session with sample data.
     """
     # Create users table
-    db_session.execute("""
+    db_session.execute(
+        """
         CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             age INTEGER
         )
-    """)
+    """
+    )
 
     # Create posts table
-    db_session.execute("""
+    db_session.execute(
+        """
         CREATE TABLE posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -88,7 +92,8 @@ def sample_db(db_session: Session) -> Session:
             content TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    """)
+    """
+    )
 
     # Insert sample data
     db_session.execute(

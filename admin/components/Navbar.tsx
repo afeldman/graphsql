@@ -1,7 +1,7 @@
 import { Head } from "$fresh/runtime.ts";
 
 interface NavbarProps {
-  user: any;
+  user: Record<string, unknown>;
 }
 
 export default function Navbar({ user }: NavbarProps) {
@@ -25,10 +25,19 @@ export default function Navbar({ user }: NavbarProps) {
                   <span>{user.username?.slice(0, 2)?.toUpperCase() ?? "U"}</span>
                 </div>
               </label>
-              <ul tabIndex={0} class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                <li><span class="font-semibold">{user.username ?? "User"}</span></li>
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/logout">Logout</a></li>
+              <ul
+                tabIndex={0}
+                class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <span class="font-semibold">{user.username ?? "User"}</span>
+                </li>
+                <li>
+                  <a href="/settings">Settings</a>
+                </li>
+                <li>
+                  <a href="/logout">Logout</a>
+                </li>
               </ul>
             </div>
           )}

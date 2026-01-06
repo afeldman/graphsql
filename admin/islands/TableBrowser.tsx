@@ -38,7 +38,11 @@ export default function TableBrowser({ table, initialRows, token }: TableBrowser
     <div class="space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-2xl font-bold">Table: {table}</h2>
-        <button class={`btn btn-sm ${loading ? "loading" : "btn-outline"}`} onClick={refresh}>
+        <button
+          type="button"
+          class={`btn btn-sm ${loading ? "loading" : "btn-outline"}`}
+          onClick={refresh}
+        >
           Refresh
         </button>
       </div>
@@ -49,8 +53,8 @@ export default function TableBrowser({ table, initialRows, token }: TableBrowser
 }
 
 function getBaseUrl(): string {
-  const fromEnv = (globalThis as any)?.Deno?.env?.get?.("GRAPHSQL_URL");
+  const fromEnv = (globalThis as Record<string, unknown>)?.Deno?.env?.get?.("GRAPHSQL_URL");
   if (fromEnv) return fromEnv;
-  const { origin } = window.location;
+  const { origin } = globalThis.location as { origin: string };
   return origin.replace(/\/admin$/, "") || origin;
 }

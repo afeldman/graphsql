@@ -1,4 +1,5 @@
 """Unit tests for REST API routes."""
+
 from fastapi.testclient import TestClient
 
 

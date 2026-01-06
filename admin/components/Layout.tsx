@@ -3,7 +3,7 @@ import Navbar from "./Navbar.tsx";
 import Sidebar from "./Sidebar.tsx";
 
 interface LayoutProps {
-  user: any;
+  user: Record<string, unknown>;
   children: ComponentChildren;
 }
 

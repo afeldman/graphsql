@@ -1,4 +1,5 @@
 """Sphinx configuration for GraphSQL documentation."""
+
 from __future__ import annotations
 
 import os

@@ -52,13 +52,15 @@ export default function LiveFeed() {
                 <div key={idx} class="alert shadow-lg">
                   <div>
                     <span
-                      class={`badge badge-${msg.type === "insert"
-                        ? "success"
-                        : msg.type === "update"
-                        ? "warning"
-                        : msg.type === "delete"
-                        ? "error"
-                        : "info"}`}
+                      class={`badge badge-${
+                        msg.type === "insert"
+                          ? "success"
+                          : msg.type === "update"
+                          ? "warning"
+                          : msg.type === "delete"
+                          ? "error"
+                          : "info"
+                      }`}
                     >
                       {msg.type}
                     </span>
@@ -73,6 +75,7 @@ export default function LiveFeed() {
         </div>
 
         <button
+          type="button"
           class="btn btn-sm btn-ghost mt-4"
           onClick={() => getWebSocket().clearMessages()}
         >

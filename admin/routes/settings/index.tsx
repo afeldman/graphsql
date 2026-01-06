@@ -1,9 +1,9 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
-import { requireAuth, getAuthUser } from "../../lib/auth.ts";
+import { requireAuth } from "../../lib/auth.ts";
 
 interface SettingsData {
-  user: any;
+  user: Record<string, unknown>;
   config: Record<string, string | number | boolean>;
 }
 
@@ -31,8 +31,14 @@ export default function SettingsPage({ data }: PageProps<SettingsData>) {
           <div class="card-body">
             <h2 class="card-title">Deployment</h2>
             <div class="space-y-2 text-sm">
-              <div class="flex justify-between"><span>API Base</span><span class="font-mono">{data.config.apiBase}</span></div>
-              <div class="flex justify-between"><span>Region</span><span class="font-mono">{data.config.deployTarget}</span></div>
+              <div class="flex justify-between">
+                <span>API Base</span>
+                <span class="font-mono">{data.config.apiBase}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Region</span>
+                <span class="font-mono">{data.config.deployTarget}</span>
+              </div>
             </div>
           </div>
         </div>

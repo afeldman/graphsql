@@ -1,4 +1,5 @@
 """Environment setup for behave tests."""
+
 import os
 from pathlib import Path
 

@@ -1,7 +1,8 @@
 """Common step implementations shared across features."""
+
 from typing import Any
 
-from behave import given, when, then
+from behave import given, then, when
 from fastapi.testclient import TestClient
 
 from graphsql.main import app
@@ -11,6 +12,7 @@ from graphsql.main import app
 def step_api_running(context: Any) -> None:
     """Set up running API."""
     import os
+
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     context.client = TestClient(app)
 
@@ -45,7 +47,7 @@ def step_status_204(context: Any) -> None:
     assert context.response.status_code == 204, f"Expected 204, got {context.response.status_code}"
 
 
-@then("the response should contain status \"healthy\"")
+@then('the response should contain status "healthy"')
 def step_contains_healthy_status(context: Any) -> None:
     """Assert response contains healthy status."""
     data = context.response.json()

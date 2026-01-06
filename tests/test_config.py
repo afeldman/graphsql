@@ -1,4 +1,5 @@
 """Unit tests for configuration module."""
+
 from typing import Any
 
 from graphsql.config import Settings

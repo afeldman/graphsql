@@ -1,9 +1,9 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
-import { requireAuth, getAuthUser } from "../../lib/auth.ts";
+import { requireAuth } from "../../lib/auth.ts";
 
 interface Data {
-  user: any;
+  user: Record<string, unknown>;
 }
 
 export const handler: Handlers<Data> = {

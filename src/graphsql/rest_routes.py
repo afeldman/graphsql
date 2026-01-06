@@ -1,31 +1,33 @@
 """REST API routes."""
-from typing import Any, Dict, List
+
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi import Query as QueryParam
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from graphsql.cache import cache_get, cache_set
 from graphsql.config import settings
 from graphsql.database import db_manager, get_db, serialize_model
-from graphsql.rate_limit import limiter
-from graphsql.cache import cache_get, cache_set
 from graphsql.events import publish_change
+from graphsql.rate_limit import limiter
 
 router = APIRouter(prefix="/api", tags=["REST API"])
 
 
 class PaginatedResponse(BaseModel):
     """Paginated response model."""
-    data: List[Dict[str, Any]]
+
+    data: list[dict[str, Any]]
     total: int
     limit: int
     offset: int
 
 
-@router.get("/tables", response_model=Dict[str, List[str]])
+@router.get("/tables", response_model=dict[str, list[str]])
 @limiter.limit(settings.rate_limit_tables)
-async def list_tables(request: Request) -> Dict[str, List[str]]:
+async def list_tables(request: Request) -> dict[str, list[str]]:
     """List all available tables in the database.
 
     Returns:
@@ -47,7 +49,7 @@ async def list_tables(request: Request) -> Dict[str, List[str]]:
 
 @router.get("/tables/{table_name}/info")
 @limiter.limit(settings.rate_limit_tables)
-async def get_table_info(request: Request, table_name: str) -> Dict[str, Any]:
+async def get_table_info(request: Request, table_name: str) -> dict[str, Any]:
     """Return reflected metadata for a specific table.
 
     Args:
@@ -79,7 +81,7 @@ async def get_all_records(
     table_name: str,
     offset: int = QueryParam(0, ge=0),
     limit: int = QueryParam(settings.default_page_size, ge=1),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> PaginatedResponse:
     """Get paginated records from a table.
 
@@ -117,16 +119,14 @@ async def get_all_records(
         data=[serialize_model(record) for record in records],
         total=total,
         limit=safe_limit,
-        offset=offset
+        offset=offset,
     )
 
 
 @router.get("/{table_name}/{record_id}")
 async def get_record(
-    table_name: str,
-    record_id: int,
-    db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+    table_name: str, record_id: int, db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Get a specific record by ID.
 
     Args:
@@ -163,10 +163,8 @@ async def get_record(
 
 @router.post("/{table_name}", status_code=201)
 async def create_record(
-    table_name: str,
-    data: Dict[str, Any],
-    db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+    table_name: str, data: dict[str, Any], db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Create a new record in the table.
 
     Args:
@@ -200,16 +198,13 @@ async def create_record(
         return serialize_model(new_record)
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.put("/{table_name}/{record_id}")
 async def update_record(
-    table_name: str,
-    record_id: int,
-    data: Dict[str, Any],
-    db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+    table_name: str, record_id: int, data: dict[str, Any], db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Update an existing record.
 
     Args:
@@ -255,26 +250,19 @@ async def update_record(
         return serialize_model(record)
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.patch("/{table_name}/{record_id}")
 async def patch_record(
-    table_name: str,
-    record_id: int,
-    data: Dict[str, Any],
-    db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+    table_name: str, record_id: int, data: dict[str, Any], db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Partially update an existing record."""
     return await update_record(table_name, record_id, data, db)
 
 
 @router.delete("/{table_name}/{record_id}", status_code=204)
-async def delete_record(
-    table_name: str,
-    record_id: int,
-    db: Session = Depends(get_db)
-) -> None:
+async def delete_record(table_name: str, record_id: int, db: Session = Depends(get_db)) -> None:
     """Delete a record by primary key.
 
     Args:
@@ -311,4 +299,4 @@ async def delete_record(
         await publish_change(table_name, "deleted", serialized)
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e

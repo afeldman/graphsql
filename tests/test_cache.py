@@ -1,13 +1,20 @@
 """Tests for Redis caching and session storage."""
 
 import json
+
+import fakeredis.aioredis
 import pytest
 import pytest_asyncio
 
-import fakeredis.aioredis
-
 from graphsql import cache
-from graphsql.cache import cache_delete, cache_get, cache_set, session_create, session_delete, session_get
+from graphsql.cache import (
+    cache_delete,
+    cache_get,
+    cache_set,
+    session_create,
+    session_delete,
+    session_get,
+)
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")

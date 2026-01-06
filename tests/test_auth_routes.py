@@ -1,10 +1,8 @@
 """Integration tests for authentication endpoints."""
 
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from graphsql.auth_routes import users_db, LoginRequest
 from graphsql.main import app
 
 client = TestClient(app)

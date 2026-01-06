@@ -21,7 +21,7 @@ export const handler: Handlers = {
     }
   },
 
-  async DELETE(_req) {
+  DELETE(_req) {
     const headers = new Headers();
     clearAuthCookies(headers);
     return new Response("", { status: 204, headers });

@@ -37,7 +37,7 @@ export default function QueryBuilder() {
         <div>
           <div class="flex justify-between items-center mb-2">
             <span class="font-semibold">Filters</span>
-            <button class="btn btn-xs" onClick={addFilter}>Add</button>
+            <button type="button" class="btn btn-xs" onClick={addFilter}>Add</button>
           </div>
           <div class="space-y-2">
             {Object.entries(filters).map(([key, value]) => (
@@ -46,7 +46,8 @@ export default function QueryBuilder() {
                 class="input input-bordered w-full"
                 placeholder={`${key} = value`}
                 value={value}
-                onInput={(e) => setFilters({ ...filters, [key]: (e.target as HTMLInputElement).value })}
+                onInput={(e) =>
+                  setFilters({ ...filters, [key]: (e.target as HTMLInputElement).value })}
               />
             ))}
             {Object.keys(filters).length === 0 && (

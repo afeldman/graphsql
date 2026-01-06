@@ -1,9 +1,9 @@
 """Application settings loaded from environment variables via python-decouple."""
+
 from __future__ import annotations
 
 import secrets
 from dataclasses import dataclass, field
-from typing import List
 
 from decouple import config as env_config
 
@@ -27,7 +27,7 @@ class Settings:
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     api_reload: bool = True
-    cors_origins: List[str] = field(default_factory=lambda: ["*"])
+    cors_origins: list[str] = field(default_factory=lambda: ["*"])
     api_key: str = ""
     enable_auth: bool = False
     default_page_size: int = 50
@@ -46,7 +46,7 @@ class Settings:
     session_prefix: str = "graphsql:session:"
 
     @classmethod
-    def load(cls) -> "Settings":
+    def load(cls) -> Settings:
         """Build a settings instance from environment variables.
 
         Returns:
@@ -112,7 +112,7 @@ class Settings:
         )
 
     @staticmethod
-    def parse_cors_origins(raw: str) -> List[str]:
+    def parse_cors_origins(raw: str) -> list[str]:
         """Convert a comma-separated origins string into a list.
 
         Args:

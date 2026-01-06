@@ -1,4 +1,5 @@
 """Unit tests for utility functions."""
+
 from datetime import datetime
 from decimal import Decimal
 

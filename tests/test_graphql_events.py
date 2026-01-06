@@ -6,7 +6,9 @@ from graphsql import graphql_schema
 
 
 class FakeColumn:
-    def __init__(self, name: str, py_type, primary_key: bool = False, autoincrement: bool = False) -> None:
+    def __init__(
+        self, name: str, py_type, primary_key: bool = False, autoincrement: bool = False
+    ) -> None:
         self.name = name
         self.primary_key = primary_key
         self.autoincrement = autoincrement
@@ -82,9 +84,7 @@ def test_graphql_create_emits_event(graphql_app):
     app, calls = graphql_app
     client = TestClient(app)
 
-    mutation = {
-        "query": "mutation { createUsers(data: { name: \"Alice\" }) { id name } }"
-    }
+    mutation = {"query": 'mutation { createUsers(data: { name: "Alice" }) { id name } }'}
     resp = client.post("/graphql", json=mutation)
 
     assert resp.status_code == 200

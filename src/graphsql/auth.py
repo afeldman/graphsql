@@ -1,7 +1,6 @@
 """JWT Authentication module for GraphSQL."""
 
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -47,13 +46,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(
     user_id: str,
     scope: str = "default",
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
 ) -> TokenResponse:
     """Create JWT access token."""
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
 
-    expire = datetime.now(timezone.utc) + expires_delta
+    expire = datetime.now(UTC) + expires_delta
     to_encode = {"user_id": user_id, "scope": scope, "exp": expire}
 
     try:
@@ -94,23 +93,23 @@ def verify_token(token: str) -> TokenData:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
-        )
+        ) from None
     except jwt.InvalidTokenError as e:
         logger.warning(f"Invalid token: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
-        )
+        ) from e
     except Exception as e:
         logger.error(f"Error verifying token: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token verification failed",
-        )
+        ) from e
 
 
 async def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> TokenData:
     """Dependency to get current authenticated user."""
     if credentials is None:
@@ -124,8 +123,8 @@ async def get_current_user(
 
 
 async def get_optional_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-) -> Optional[TokenData]:
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+) -> TokenData | None:
     """Dependency to get current user if authenticated (optional)."""
     if credentials is None:
         return None

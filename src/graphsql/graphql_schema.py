@@ -1,5 +1,6 @@
 """GraphQL schema generation using Strawberry."""
-from typing import Any, Dict, List, Optional
+
+from typing import Any
 
 import strawberry
 from sqlalchemy.orm import Session
@@ -27,7 +28,7 @@ def create_graphql_schema() -> GraphQLRouter:
     """
 
     # Dynamically create types for each table
-    table_types: Dict[str, Any] = {}
+    table_types: dict[str, Any] = {}
 
     for table_name in db_manager.list_tables():
         model = db_manager.get_model(table_name)
@@ -41,15 +42,15 @@ def create_graphql_schema() -> GraphQLRouter:
 
             # Map Python types to Strawberry types
             if python_type is str:
-                field_type = Optional[str]
+                field_type = str | None
             elif python_type is int:
-                field_type = Optional[int]
+                field_type = int | None
             elif python_type is float:
-                field_type = Optional[float]
+                field_type = float | None
             elif python_type is bool:
-                field_type = Optional[bool]
+                field_type = bool | None
             else:
-                field_type = Optional[str]  # Fallback
+                field_type = str | None  # Fallback
 
             fields[column.name] = field_type
 
@@ -58,10 +59,7 @@ def create_graphql_schema() -> GraphQLRouter:
             type(
                 f"{table_name.capitalize()}Type",
                 (),
-                {
-                    "__annotations__": fields,
-                    **{k: None for k in fields.keys()}
-                }
+                {"__annotations__": fields, **dict.fromkeys(fields.keys())},
             )
         )
 
@@ -75,13 +73,15 @@ def create_graphql_schema() -> GraphQLRouter:
         pk_column = db_manager.get_primary_key_column(table_name)
 
         # Single record query
-        def make_single_resolver(model_class: Any, pk_col: str, tbl_name: str, table_type: Any) -> Any:
-            def resolver(id: int, info: Any) -> Optional[table_type]:
+        def make_single_resolver(
+            model_class: Any, pk_col: str, tbl_name: str, table_type: Any
+        ) -> Any:
+            def resolver(id: int, info: Any) -> table_type | None:
                 db: Session = next(get_db())
                 try:
-                    record = db.query(model_class).filter(
-                        getattr(model_class, pk_col) == id
-                    ).first()
+                    record = (
+                        db.query(model_class).filter(getattr(model_class, pk_col) == id).first()
+                    )
 
                     if not record:
                         return None
@@ -101,15 +101,16 @@ def create_graphql_schema() -> GraphQLRouter:
         # List query
         def make_list_resolver(model_class: Any, tbl_name: str, table_type: Any) -> Any:
             def resolver(
-                limit: int = settings.default_page_size,
-                offset: int = 0,
-                info: Any = None
-            ) -> List[table_type]:
+                limit: int = settings.default_page_size, offset: int = 0, info: Any = None
+            ) -> list[table_type]:
                 db: Session = next(get_db())
                 try:
-                    records = db.query(model_class).offset(offset).limit(
-                        min(limit, settings.max_page_size)
-                    ).all()
+                    records = (
+                        db.query(model_class)
+                        .offset(offset)
+                        .limit(min(limit, settings.max_page_size))
+                        .all()
+                    )
 
                     result = []
                     for record in records:
@@ -153,15 +154,15 @@ def create_graphql_schema() -> GraphQLRouter:
                 python_type = column.type.python_type
 
                 if python_type is str:
-                    field_type = Optional[str]
+                    field_type = str | None
                 elif python_type is int:
-                    field_type = Optional[int]
+                    field_type = int | None
                 elif python_type is float:
-                    field_type = Optional[float]
+                    field_type = float | None
                 elif python_type is bool:
-                    field_type = Optional[bool]
+                    field_type = bool | None
                 else:
-                    field_type = Optional[str]
+                    field_type = str | None
 
                 input_fields[column.name] = field_type
 
@@ -170,22 +171,22 @@ def create_graphql_schema() -> GraphQLRouter:
             type(
                 f"{table_name.capitalize()}Input",
                 (),
-                {
-                    "__annotations__": input_fields,
-                    **{k: None for k in input_fields.keys()}
-                }
+                {"__annotations__": input_fields, **dict.fromkeys(input_fields.keys())},
             )
         )
 
         # Create mutation
-        def make_create_mutation(model_class: Any, tbl_name: str, table_type: Any, input_type: Any) -> Any:
+        def make_create_mutation(
+            model_class: Any, tbl_name: str, table_type: Any, input_type: Any
+        ) -> Any:
             async def mutation(data: input_type, info: Any) -> table_type:
                 db: Session = next(get_db())
                 try:
                     # Convert Strawberry input to dict
                     data_dict = {
-                        k: v for k, v in vars(data).items()
-                        if v is not None and not k.startswith('_')
+                        k: v
+                        for k, v in vars(data).items()
+                        if v is not None and not k.startswith("_")
                     }
 
                     new_record = model_class(**data_dict)

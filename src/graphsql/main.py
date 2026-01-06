@@ -1,7 +1,8 @@
 """Main FastAPI application."""
+
 import sys
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,17 +89,19 @@ async def root() -> JSONResponse:
         >>> resp.body  # doctest: +SKIP
         b'{"name": "Auto API", ...}'
     """
-    return JSONResponse({
-        "name": "Auto API",
-        "version": "0.1.0",
-        "endpoints": {
-            "rest": "/api",
-            "graphql": "/graphql",
-            "docs": "/docs",
-            "tables": "/api/tables"
-        },
-        "tables": db_manager.list_tables()
-    })
+    return JSONResponse(
+        {
+            "name": "Auto API",
+            "version": "0.1.0",
+            "endpoints": {
+                "rest": "/api",
+                "graphql": "/graphql",
+                "docs": "/docs",
+                "tables": "/api/tables",
+            },
+            "tables": db_manager.list_tables(),
+        }
+    )
 
 
 @app.get("/health", tags=["Health"])
@@ -115,20 +118,12 @@ async def health_check() -> JSONResponse:
     try:
         # Test database connection
         tables = db_manager.list_tables()
-        return JSONResponse({
-            "status": "healthy",
-            "database": "connected",
-            "tables_count": len(tables)
-        })
+        return JSONResponse(
+            {"status": "healthy", "database": "connected", "tables_count": len(tables)}
+        )
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return JSONResponse(
-            status_code=503,
-            content={
-                "status": "unhealthy",
-                "error": str(e)
-            }
-        )
+        return JSONResponse(status_code=503, content={"status": "unhealthy", "error": str(e)})
 
 
 # Include REST routes

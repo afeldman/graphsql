@@ -1,13 +1,13 @@
 """Tests for pagination clamping and rate-limited list endpoint."""
 
-from typing import Any, List
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
-from graphsql.database import get_db
 from graphsql import rest_routes
 from graphsql.config import settings
+from graphsql.database import get_db
 from graphsql.main import app
 
 
@@ -17,7 +17,7 @@ class FakeColumn:
 
 
 class FakeTable:
-    def __init__(self, column_names: List[str]) -> None:
+    def __init__(self, column_names: list[str]) -> None:
         self.columns = [FakeColumn(name) for name in column_names]
 
 
