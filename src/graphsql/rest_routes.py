@@ -72,10 +72,12 @@ async def get_table_info(request: Request, table_name: str) -> Dict[str, Any]:
 
 
 @router.get("/{table_name}", response_model=PaginatedResponse)
+@limiter.limit(settings.rate_limit_tables)
 async def get_all_records(
+    request: Request,
     table_name: str,
     offset: int = QueryParam(0, ge=0),
-    limit: int = QueryParam(settings.default_page_size, ge=1, le=settings.max_page_size),
+    limit: int = QueryParam(settings.default_page_size, ge=1),
     db: Session = Depends(get_db)
 ) -> PaginatedResponse:
     """Get paginated records from a table.
@@ -101,16 +103,19 @@ async def get_all_records(
     if not model:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
 
+    # Enforce max page size defensively
+    safe_limit = min(limit, settings.max_page_size)
+
     # Get total count
     total = db.query(model).count()
 
     # Get paginated records
-    records = db.query(model).offset(offset).limit(limit).all()
+    records = db.query(model).offset(offset).limit(safe_limit).all()
 
     return PaginatedResponse(
         data=[serialize_model(record) for record in records],
         total=total,
-        limit=limit,
+        limit=safe_limit,
         offset=offset
     )
 
