@@ -7,11 +7,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from graphsql.auth_routes import router as auth_router
 from graphsql.config import settings
 from graphsql.database import db_manager
 from graphsql.graphql_schema import create_graphql_schema
+from graphsql.rate_limit import limiter
 from graphsql.rest_routes import router as rest_router
 
 # Configure loguru sink to mirror the requested log level early at import time.
@@ -55,6 +58,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Add rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
 app.add_middleware(

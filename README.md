@@ -1335,6 +1335,81 @@ from fastapi import HTTPException, status
 
 ---
 
+## ⚡ Rate Limiting
+
+GraphSQL includes **built-in rate limiting** to protect your API from abuse. All endpoints are rate-limited by default.
+
+### Default Limits
+
+| Endpoint Type | Limit |
+|--------------|-------|
+| **Global Default** | 60 requests/minute per IP |
+| **List Tables** | 100 requests/minute per IP |
+| **Table Info** | 100 requests/minute per IP |
+| **Auth Login** | 60 requests/minute per IP |
+
+### How It Works
+
+Rate limiting is implemented via `slowapi` middleware, which uses the client's IP address as the key. When a client exceeds the limit, they receive a `429 Too Many Requests` response.
+
+**Response Headers:**
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1704110400
+```
+
+### Configuration
+
+Add to `.env`:
+
+```env
+# Rate limiting is automatic, no additional configuration needed
+# Customize per-endpoint using decorators (see code examples below)
+```
+
+### Per-Endpoint Configuration
+
+Endpoints can have custom rate limits:
+
+```python
+from fastapi import APIRouter
+from graphsql.rate_limit import limiter
+
+@app.get("/api/expensive-operation")
+@limiter.limit("10 per minute")  # Stricter limit for expensive operations
+async def expensive_operation():
+    return {"status": "success"}
+```
+
+### Production Setup with Redis
+
+For production, configure Redis storage for distributed rate limiting:
+
+```python
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri="redis://localhost:6379",  # Redis connection string
+)
+```
+
+### Error Responses
+
+When rate limit is exceeded:
+
+```json
+{
+  "detail": "429 Too Many Requests"
+}
+```
+
+HTTP Status: `429 Too Many Requests`
+
+---
+
 ## 🧪 Testing
 
 ### Quick Start

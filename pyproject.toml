@@ -40,6 +40,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",  # JWT
     "passlib[bcrypt]>=1.7.4",  # Password hashing
     "PyJWT>=2.8.0",  # JWT encoding/decoding
+    "slowapi>=0.1.9",  # Rate limiting
 ]
 
 [project.optional-dependencies]

@@ -1,13 +1,14 @@
 """REST API routes."""
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi import Query as QueryParam
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from graphsql.config import settings
 from graphsql.database import db_manager, get_db, serialize_model
+from graphsql.rate_limit import limiter
 
 router = APIRouter(prefix="/api", tags=["REST API"])
 
@@ -21,7 +22,8 @@ class PaginatedResponse(BaseModel):
 
 
 @router.get("/tables", response_model=Dict[str, List[str]])
-async def list_tables() -> Dict[str, List[str]]:
+@limiter.limit("100 per minute")
+async def list_tables(request: Request) -> Dict[str, List[str]]:
     """List all available tables in the database.
 
     Returns:
@@ -35,7 +37,8 @@ async def list_tables() -> Dict[str, List[str]]:
 
 
 @router.get("/tables/{table_name}/info")
-async def get_table_info(table_name: str) -> Dict[str, Any]:
+@limiter.limit("100 per minute")
+async def get_table_info(request: Request, table_name: str) -> Dict[str, Any]:
     """Return reflected metadata for a specific table.
 
     Args:
