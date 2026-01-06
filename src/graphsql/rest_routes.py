@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from graphsql.config import settings
 from graphsql.database import db_manager, get_db, serialize_model
 from graphsql.rate_limit import limiter
+from graphsql.cache import cache_get, cache_set
 
 router = APIRouter(prefix="/api", tags=["REST API"])
 
@@ -22,7 +23,7 @@ class PaginatedResponse(BaseModel):
 
 
 @router.get("/tables", response_model=Dict[str, List[str]])
-@limiter.limit("100 per minute")
+@limiter.limit(settings.rate_limit_tables)
 async def list_tables(request: Request) -> Dict[str, List[str]]:
     """List all available tables in the database.
 
@@ -33,11 +34,18 @@ async def list_tables(request: Request) -> Dict[str, List[str]]:
         >>> await list_tables()  # doctest: +SKIP
         {'tables': ['users', 'orders']}
     """
-    return {"tables": db_manager.list_tables()}
+    cache_key = "tables:list"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    tables = {"tables": db_manager.list_tables()}
+    await cache_set(cache_key, tables)
+    return tables
 
 
 @router.get("/tables/{table_name}/info")
-@limiter.limit("100 per minute")
+@limiter.limit(settings.rate_limit_tables)
 async def get_table_info(request: Request, table_name: str) -> Dict[str, Any]:
     """Return reflected metadata for a specific table.
 
@@ -50,9 +58,16 @@ async def get_table_info(request: Request, table_name: str) -> Dict[str, Any]:
     Raises:
         HTTPException: If the table does not exist.
     """
+    cache_key = f"tables:info:{table_name}"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     info = db_manager.get_table_info(table_name)
     if not info:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")
+
+    await cache_set(cache_key, info)
     return info
 
 

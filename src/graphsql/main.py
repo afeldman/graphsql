@@ -11,6 +11,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from graphsql.auth_routes import router as auth_router
+from graphsql.cache import close_redis
 from graphsql.config import settings
 from graphsql.database import db_manager
 from graphsql.graphql_schema import create_graphql_schema
@@ -47,6 +48,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Shutdown
     logger.info("Shutting down Auto API...")
+    await close_redis()
 
 
 # Create FastAPI app

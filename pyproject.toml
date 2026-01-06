@@ -41,6 +41,7 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",  # Password hashing
     "PyJWT>=2.8.0",  # JWT encoding/decoding
     "slowapi>=0.1.9",  # Rate limiting
+    "redis>=5.0.0",  # Caching and sessions
 ]
 
 [project.optional-dependencies]
@@ -56,6 +57,7 @@ dev = [
     "sphinx-autodoc-typehints>=1.20.0",
     "behave>=1.2.6",
     "faker>=21.0.0",
+    "fakeredis>=2.23.2",
 ]
 sqlite = [
     "aiosqlite>=0.19.0",

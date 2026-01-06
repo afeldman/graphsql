@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from .auth import create_access_token, TokenResponse
+from .cache import session_create
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -55,4 +56,11 @@ async def login(credentials: LoginRequest) -> TokenResponse:
         user_id=user["user_id"],
         scope=user.get("scope", "default"),
     )
+
+    # Store session in Redis (optional; best-effort)
+    await session_create(
+        session_id=token.access_token,
+        data={"user_id": user["user_id"], "scope": user.get("scope", "default")},
+    )
+
     return token

@@ -36,6 +36,14 @@ class Settings:
     jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 1440  # 24 hours
+    rate_limit_default: str = "60/minute"
+    rate_limit_tables: str = "100/minute"
+    rate_limit_storage_uri: str = "memory://"
+    redis_url: str = "redis://localhost:6379/0"
+    cache_ttl_seconds: int = 300
+    cache_prefix: str = "graphsql:cache:"
+    session_ttl_seconds: int = 86400
+    session_prefix: str = "graphsql:session:"
 
     @classmethod
     def load(cls) -> "Settings":
@@ -59,6 +67,14 @@ class Settings:
         - ``JWT_SECRET_KEY``: Secret key for JWT encoding (auto-generated if not set)
         - ``JWT_ALGORITHM``: JWT algorithm (default ``HS256``)
         - ``JWT_EXPIRATION_MINUTES``: JWT expiration in minutes (default ``1440``)
+        - ``RATE_LIMIT_DEFAULT``: Default rate limit (default ``60/minute``)
+        - ``RATE_LIMIT_TABLES``: Rate limit for table endpoints (default ``100/minute``)
+        - ``RATE_LIMIT_STORAGE_URI``: Backend for rate limiting (default ``memory://``)
+        - ``REDIS_URL``: Redis connection URL for caching/sessions (default ``redis://localhost:6379/0``)
+        - ``CACHE_TTL_SECONDS``: Default cache TTL in seconds (default ``300``)
+        - ``CACHE_PREFIX``: Cache key prefix (default ``graphsql:cache:"`)
+        - ``SESSION_TTL_SECONDS``: Session TTL in seconds (default ``86400``)
+        - ``SESSION_PREFIX``: Session key prefix (default ``graphsql:session:"`)
 
         Examples:
             >>> settings = Settings.load()
@@ -85,6 +101,14 @@ class Settings:
             jwt_secret_key=jwt_secret,
             jwt_algorithm=env_config("JWT_ALGORITHM", default="HS256"),
             jwt_expiration_minutes=env_config("JWT_EXPIRATION_MINUTES", cast=int, default=1440),
+            rate_limit_default=env_config("RATE_LIMIT_DEFAULT", default="60/minute"),
+            rate_limit_tables=env_config("RATE_LIMIT_TABLES", default="100/minute"),
+            rate_limit_storage_uri=env_config("RATE_LIMIT_STORAGE_URI", default="memory://"),
+            redis_url=env_config("REDIS_URL", default="redis://localhost:6379/0"),
+            cache_ttl_seconds=env_config("CACHE_TTL_SECONDS", cast=int, default=300),
+            cache_prefix=env_config("CACHE_PREFIX", default="graphsql:cache:"),
+            session_ttl_seconds=env_config("SESSION_TTL_SECONDS", cast=int, default=86400),
+            session_prefix=env_config("SESSION_PREFIX", default="graphsql:session:"),
         )
 
     @staticmethod
@@ -121,6 +145,46 @@ class Settings:
     def JWT_EXPIRATION_MINUTES(self) -> int:
         """Get JWT expiration minutes."""
         return self.jwt_expiration_minutes
+
+    @property
+    def RATE_LIMIT_DEFAULT(self) -> str:
+        """Get default rate limit string."""
+        return self.rate_limit_default
+
+    @property
+    def RATE_LIMIT_TABLES(self) -> str:
+        """Get tables rate limit string."""
+        return self.rate_limit_tables
+
+    @property
+    def RATE_LIMIT_STORAGE_URI(self) -> str:
+        """Get rate limit storage URI."""
+        return self.rate_limit_storage_uri
+
+    @property
+    def REDIS_URL(self) -> str:
+        """Get Redis connection URL."""
+        return self.redis_url
+
+    @property
+    def CACHE_TTL_SECONDS(self) -> int:
+        """Get default cache TTL."""
+        return self.cache_ttl_seconds
+
+    @property
+    def CACHE_PREFIX(self) -> str:
+        """Get cache key prefix."""
+        return self.cache_prefix
+
+    @property
+    def SESSION_TTL_SECONDS(self) -> int:
+        """Get session TTL."""
+        return self.session_ttl_seconds
+
+    @property
+    def SESSION_PREFIX(self) -> str:
+        """Get session key prefix."""
+        return self.session_prefix
 
     @property
     def is_sqlite(self) -> bool:

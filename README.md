@@ -1235,6 +1235,18 @@ Add to `.env`:
 JWT_SECRET_KEY=your-super-secret-key-change-this-in-production
 JWT_ALGORITHM=HS256
 JWT_EXPIRATION_MINUTES=1440  # 24 hours
+
+# Rate Limiting
+RATE_LIMIT_DEFAULT=60/minute
+RATE_LIMIT_TABLES=100/minute
+RATE_LIMIT_STORAGE_URI=memory://  # For production use redis://<host>:6379
+
+# Redis Cache & Sessions
+REDIS_URL=redis://localhost:6379/0
+CACHE_TTL_SECONDS=300
+CACHE_PREFIX=graphsql:cache:
+SESSION_TTL_SECONDS=86400
+SESSION_PREFIX=graphsql:session:
 ```
 
 **Auto-generation:** If `JWT_SECRET_KEY` is not set, it will be automatically generated on startup.
