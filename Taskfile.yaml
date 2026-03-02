@@ -1,0 +1,192 @@
+# https://taskfile.dev
+version: "3"
+
+vars:
+  PACKAGE: graphsql
+  SRC_DIR: src
+  ADMIN_DIR: admin
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  install:
+    desc: Install package
+    cmds:
+      - uv pip install -e .
+
+  dev:
+    desc: Install package with dev dependencies
+    cmds:
+      - uv pip install -e ".[dev]"
+      - pre-commit install
+
+  sync:
+    desc: Sync dependencies with uv
+    cmds:
+      - uv sync
+
+  # Testing
+  test:
+    desc: Run all tests (unit + BDD)
+    deps: [test-unit, test-bdd]
+    cmds:
+      - echo "✅ All tests passed!"
+
+  test-unit:
+    desc: Run unit tests with pytest
+    cmds:
+      - echo "Running unit tests..."
+      - uv run pytest -v
+
+  test-bdd:
+    desc: Run BDD tests with behave
+    cmds:
+      - echo "Running BDD tests..."
+      - uv run behave
+
+  test-coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - echo "Running tests with coverage..."
+      - uv run pytest --cov={{.SRC_DIR}} --cov-report=html --cov-report=term-missing
+      - echo "Coverage report generated in htmlcov/index.html"
+
+  test-watch:
+    desc: Watch tests on file changes
+    cmds:
+      - echo "Watching for test changes..."
+      - uv run pytest-watch -- -v
+
+  # Linting & Formatting
+  lint:
+    desc: Run linters (ruff + mypy)
+    cmds:
+      - uv run ruff check {{.SRC_DIR}}/
+      - uv run mypy {{.SRC_DIR}}/
+
+  ruff:
+    desc: Run ruff linter
+    cmds:
+      - uv run ruff check {{.SRC_DIR}}/
+
+  mypy:
+    desc: Type checking with mypy
+    cmds:
+      - uv run mypy {{.SRC_DIR}}/
+
+  format:
+    desc: Format code (Python + TypeScript)
+    cmds:
+      - uv run ruff format {{.SRC_DIR}}/
+      - uv run ruff check {{.SRC_DIR}}/ --fix
+      - deno fmt {{.ADMIN_DIR}}
+
+  format-check:
+    desc: Check code formatting
+    cmds:
+      - uv run ruff format --check {{.SRC_DIR}}/
+
+  deno-lint:
+    desc: Lint TypeScript/Fresh admin
+    cmds:
+      - deno lint {{.ADMIN_DIR}}
+
+  deno-fmt:
+    desc: Format TypeScript/Fresh admin
+    cmds:
+      - deno fmt {{.ADMIN_DIR}}
+
+  # Documentation
+  docs:
+    desc: Build Sphinx documentation
+    cmds:
+      - uv run sphinx-build -b html docs docs/_build
+      - echo "📚 Documentation built in docs/_build/"
+
+  # Quality
+  quality:
+    desc: Run complete quality check (lint, test, docs)
+    deps: [lint, deno-lint, test, docs]
+    cmds:
+      - echo "✅ Quality check passed!"
+
+  check:
+    desc: Quick quality check (lint + format-check)
+    cmds:
+      - task: ruff
+      - task: format-check
+      - task: mypy
+
+  # MCP Server
+  mcp:
+    desc: Run MCP server
+    cmds:
+      - uv run graphsql-mcp
+    env:
+      DATABASE_URL: "{{.DATABASE_URL | default \"sqlite:///./database.db\"}}"
+
+  # Docker
+  docker-build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.PACKAGE}}:latest .
+
+  docker-run:
+    desc: Run Docker container
+    cmds:
+      - docker run -p 8000:8000 --env-file .env {{.PACKAGE}}:latest
+
+  docker-up:
+    desc: Start services with docker-compose
+    cmds:
+      - docker-compose up -d
+
+  docker-down:
+    desc: Stop docker-compose services
+    cmds:
+      - docker-compose down
+
+  # Development
+  serve:
+    desc: Start development server
+    cmds:
+      - uv run graphsql server --reload
+
+  inspect:
+    desc: Inspect database
+    cmds:
+      - uv run graphsql inspect
+
+  # Cleanup
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+      - find . -type f -name "*.pyc" -delete 2>/dev/null || true
+      - rm -rf .pytest_cache .mypy_cache .ruff_cache
+      - rm -rf htmlcov .coverage
+      - rm -rf dist build *.egg-info
+      - rm -rf .behave/
+      - echo "✅ Cleaned!"
+
+  clean-all:
+    desc: Clean everything including .venv
+    deps: [clean]
+    cmds:
+      - rm -rf .venv
+      - echo "✅ Everything cleaned including .venv!"
+
+  # Build & Release
+  build:
+    desc: Build package
+    cmds:
+      - uv build
+
+  publish:
+    desc: Publish package to PyPI
+    cmds:
+      - uv publish

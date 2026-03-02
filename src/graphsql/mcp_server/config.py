@@ -1,6 +1,6 @@
 """Configuration management for the MCP server.
 
-This module provides environment-based configuration using python-dotenv
+This module provides environment-based configuration using python-decouple
 and pydantic for validation. All settings can be overridden via environment
 variables or a .env file.
 
@@ -18,68 +18,10 @@ Environment Variables:
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Literal
 
-from dotenv import load_dotenv
-
-# Load .env file from current directory or parent directories
-_env_path = Path.cwd() / ".env"
-if _env_path.exists():
-    load_dotenv(_env_path)
-else:
-    # Try to find .env in parent directory
-    load_dotenv()
-
-
-def _get_bool(key: str, default: bool = False) -> bool:
-    """Parse boolean environment variable.
-
-    Args:
-        key: Environment variable name.
-        default: Default value if not set.
-
-    Returns:
-        Parsed boolean value.
-    """
-    value = os.getenv(key, str(default)).lower()
-    return value in ("true", "1", "yes", "on")
-
-
-def _get_int(key: str, default: int) -> int:
-    """Parse integer environment variable.
-
-    Args:
-        key: Environment variable name.
-        default: Default value if not set.
-
-    Returns:
-        Parsed integer value.
-    """
-    try:
-        return int(os.getenv(key, str(default)))
-    except ValueError:
-        return default
-
-
-def _get_list(key: str, default: list[str] | None = None) -> list[str]:
-    """Parse comma-separated list environment variable.
-
-    Args:
-        key: Environment variable name.
-        default: Default value if not set.
-
-    Returns:
-        Parsed list of strings.
-    """
-    if default is None:
-        default = []
-    value = os.getenv(key, "")
-    if not value:
-        return default
-    return [item.strip() for item in value.split(",") if item.strip()]
+from decouple import Csv, config
 
 
 @dataclass(frozen=True, slots=True)
@@ -163,25 +105,28 @@ class MCPServerConfig:
             >>> config.database_url
             'postgresql://user:pass@localhost/db'
         """
+        allowed = config("ALLOWED_TABLES", default="", cast=Csv())
+        denied = config("DENIED_TABLES", default="", cast=Csv())
+
         return cls(
-            database_url=os.getenv("DATABASE_URL", "sqlite:///./database.db"),
-            server_name=os.getenv("MCP_SERVER_NAME", "graphsql"),
-            server_version=os.getenv("MCP_SERVER_VERSION", "0.1.0"),
-            max_rows=_get_int("MAX_ROWS", 1000),
-            query_timeout=_get_int("QUERY_TIMEOUT", 30),
-            read_only=_get_bool("READ_ONLY", False),
-            log_level=os.getenv("LOG_LEVEL", "INFO").upper(),
-            enable_auth=_get_bool("ENABLE_AUTH", False),
-            auth_method=os.getenv("AUTH_METHOD", "none"),  # type: ignore[arg-type]
-            api_key=os.getenv("API_KEY", ""),
-            oauth_issuer=os.getenv("OAUTH_ISSUER", ""),
-            oauth_audience=os.getenv("OAUTH_AUDIENCE", ""),
-            allowed_tables=tuple(_get_list("ALLOWED_TABLES")),
-            denied_tables=tuple(_get_list("DENIED_TABLES")),
-            pool_size=_get_int("POOL_SIZE", 5),
-            pool_max_overflow=_get_int("POOL_MAX_OVERFLOW", 10),
-            pool_timeout=_get_int("POOL_TIMEOUT", 30),
-            pool_recycle=_get_int("POOL_RECYCLE", 3600),
+            database_url=config("DATABASE_URL", default="sqlite:///./database.db"),
+            server_name=config("MCP_SERVER_NAME", default="graphsql"),
+            server_version=config("MCP_SERVER_VERSION", default="0.1.0"),
+            max_rows=config("MAX_ROWS", default=1000, cast=int),
+            query_timeout=config("QUERY_TIMEOUT", default=30, cast=int),
+            read_only=config("READ_ONLY", default=False, cast=bool),
+            log_level=str(config("LOG_LEVEL", default="INFO")).upper(),
+            enable_auth=config("ENABLE_AUTH", default=False, cast=bool),
+            auth_method=config("AUTH_METHOD", default="none"),
+            api_key=config("API_KEY", default=""),
+            oauth_issuer=config("OAUTH_ISSUER", default=""),
+            oauth_audience=config("OAUTH_AUDIENCE", default=""),
+            allowed_tables=tuple(t for t in allowed if t),
+            denied_tables=tuple(t for t in denied if t),
+            pool_size=config("POOL_SIZE", default=5, cast=int),
+            pool_max_overflow=config("POOL_MAX_OVERFLOW", default=10, cast=int),
+            pool_timeout=config("POOL_TIMEOUT", default=30, cast=int),
+            pool_recycle=config("POOL_RECYCLE", default=3600, cast=int),
         )
 
     def is_table_allowed(self, table_name: str) -> bool:

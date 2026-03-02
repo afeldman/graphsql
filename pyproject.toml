@@ -42,7 +42,6 @@ dependencies = [
     "PyJWT>=2.8.0",  # JWT encoding/decoding
     "slowapi>=0.1.9",  # Rate limiting
     "redis>=5.0.0",  # Caching and sessions
-    "python-dotenv>=1.0.0",  # Environment configuration
     "mcp>=1.26.0",
 ]
 
@@ -169,7 +168,7 @@ module = "mcp.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "dotenv.*"
+module = "decouple.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
