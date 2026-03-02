@@ -38,6 +38,7 @@
 - **🧪 Code Quality** — black, ruff, mypy, pytest integration
 - **📚 Full Documentation** — Sphinx docs with Google-style docstrings
 - **🚀 Easy Startup** — Console script entry points (graphsql, graphsql-start)
+- **🤖 MCP Server** — Model Context Protocol server for LLM agent database access
 
 ## 📋 Table of Contents
 
@@ -46,6 +47,7 @@
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
+- [MCP Server](#mcp-server)
 - [Docker Deployment](#docker-deployment)
 - [Kubernetes & Helm](#kubernetes--helm)
 - [Environment Variables](#environment-variables)
@@ -474,6 +476,72 @@ Response:
   "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
+
+## 🤖 MCP Server
+
+GraphSQL includes a built-in MCP (Model Context Protocol) server that allows LLM agents to access your database.
+
+### Installation
+
+```bash
+# Install with MCP support
+pip install graphsql[mcp]
+```
+
+### Starting the MCP Server
+
+```bash
+# Start MCP server
+DATABASE_URL=postgresql://user:pass@localhost/db graphsql-mcp
+
+# With read-only mode (recommended for untrusted agents)
+READ_ONLY=true graphsql-mcp
+```
+
+### Configuration
+
+| Variable | Description | Default |
+| -------- | ----------- | ------- |
+| `DATABASE_URL` | SQLAlchemy connection string | `sqlite:///./database.db` |
+| `MCP_SERVER_NAME` | Server name shown to clients | `graphsql` |
+| `MAX_ROWS` | Maximum rows per query | `1000` |
+| `QUERY_TIMEOUT` | Query timeout in seconds | `30` |
+| `READ_ONLY` | Enable read-only mode | `false` |
+| `ALLOWED_TABLES` | Whitelist of allowed tables | (all) |
+| `DENIED_TABLES` | Blacklist of denied tables | (none) |
+
+### Available MCP Tools
+
+- **sql_query** — Execute SQL queries with automatic security validation
+- **graphql_query** — Execute GraphQL queries against the database
+- **schema_introspect** — Get database schema information
+- **health_check** — Check database connectivity
+
+### Claude Desktop Integration
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "graphsql": {
+      "command": "graphsql-mcp",
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost/mydb",
+        "READ_ONLY": "true"
+      }
+    }
+  }
+}
+```
+
+### Security Features
+
+- **Read-only mode** — Restrict to SELECT/SHOW/DESCRIBE queries
+- **Query timeout** — Prevent long-running queries
+- **Row limits** — Automatic LIMIT enforcement
+- **Pattern detection** — Block dangerous SQL patterns
+- **Table access control** — Whitelist/blacklist tables
 
 ## 🐳 Docker Deployment
 
