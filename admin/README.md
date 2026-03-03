@@ -252,18 +252,22 @@ DELETE /api/tables/:table/records/:id # Delete record
 ## Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 # Change port in deno.json or use environment variable
 PORT=3001 deno task dev
 ```
 
 ### CORS Issues
+
 Ensure backend has proper CORS headers configured.
 
 ### WebSocket Connection Failed
+
 Check that backend WebSocket endpoint is properly configured and accessible.
 
 ### JWT Token Expired
+
 Tokens expire based on `JWT_EXPIRATION` setting. User will be redirected to login.
 
 ## Contributing
