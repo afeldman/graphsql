@@ -107,7 +107,7 @@ export function getWebSocket(): GraphSQLWebSocket {
       ? Deno.env.get("GRAPHSQL_URL") || "http://localhost:8000"
       : typeof globalThis !== "undefined" && (globalThis as Record<string, unknown>).location
       ? (((globalThis as Record<string, unknown>).location as Record<string, unknown>)
-          .origin as string).replace(/\/admin$/, "")
+        .origin as string).replace(/\/admin$/, "")
       : "http://localhost:8000";
     const wsUrl = baseUrl.replace(/^http/, "ws") + "/ws";
     wsClient = new GraphSQLWebSocket(wsUrl);
