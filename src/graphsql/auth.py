@@ -8,7 +8,7 @@ try:
 except ImportError:
     from datetime import timezone
 
-    datetime.UTC = timezone.utc
+    UTC = timezone.utc
 
 
 import jwt
