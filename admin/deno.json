@@ -24,7 +24,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "preact"
   },
-  "nodeModulesDir": "auto",
+  "nodeModulesDir": true,
   "fmt": {
     "useTabs": false,
     "lineWidth": 100,
