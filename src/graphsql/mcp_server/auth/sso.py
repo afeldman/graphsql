@@ -26,10 +26,12 @@ from typing import Any, Self
 try:
     from enum import StrEnum
 except ImportError:
+
     class StrEnum(str, Enum):  # type: ignore[no-redef]
         """String Enum for Python 3.10 compatibility."""
 
         pass
+
 
 import httpx
 from loguru import logger
