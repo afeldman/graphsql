@@ -166,9 +166,7 @@ class AuthState:
 
             # Clean expired states
             expired_states = [
-                s
-                for s, t in self.pending_states.items()
-                if now - t > self.state_timeout
+                s for s, t in self.pending_states.items() if now - t > self.state_timeout
             ]
             for state in expired_states:
                 del self.pending_states[state]
@@ -246,9 +244,7 @@ def create_auth_proxy(config: AuthProxyConfig) -> FastAPI:
         )
 
         # Start cleanup task
-        cleanup_task = await start_cleanup_task(
-            session_manager, config.cleanup_interval
-        )
+        cleanup_task = await start_cleanup_task(session_manager, config.cleanup_interval)
 
         yield
 
@@ -490,7 +486,10 @@ def create_auth_proxy(config: AuthProxyConfig) -> FastAPI:
         """Get user's database configuration."""
         db_config = await config_store.get_config(user.user_id)
         if db_config is None:
-            return {"status": "not_configured", "message": "Please configure your database connection"}
+            return {
+                "status": "not_configured",
+                "message": "Please configure your database connection",
+            }
 
         # Return config with masked URL
         return {
@@ -534,7 +533,11 @@ def create_auth_proxy(config: AuthProxyConfig) -> FastAPI:
                 "status": "connected",
                 "user": user.email,
                 "mcp_name": mcp.name,
-                "tools": [tool.name for tool in tools] if tools else ["sql_query", "graphql_query", "schema_introspect", "health_check"],
+                "tools": (
+                    [tool.name for tool in tools]
+                    if tools
+                    else ["sql_query", "graphql_query", "schema_introspect", "health_check"]
+                ),
             }
         except ValueError as e:
             raise HTTPException(

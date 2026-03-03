@@ -268,7 +268,11 @@ class InMemoryConfigStore(UserConfigStore):
         logger.debug(
             "Saved configuration to in-memory store",
             user_id=user_id,
-            database_url=config.database_url[:30] + "..." if len(config.database_url) > 30 else config.database_url,
+            database_url=(
+                config.database_url[:30] + "..."
+                if len(config.database_url) > 30
+                else config.database_url
+            ),
             read_only=config.read_only,
         )
 

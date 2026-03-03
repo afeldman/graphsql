@@ -237,7 +237,8 @@ Environment Variables (for proxy mode):
         help="Generate a new encryption key and exit",
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Enable verbose logging",
     )
@@ -263,7 +264,7 @@ def main() -> None:
         key = generate_encryption_key()
         print(f"Generated encryption key:\n{key}")
         print("\nSet this in your environment:")
-        print(f"export ENCRYPTION_KEY=\"{key}\"")
+        print(f'export ENCRYPTION_KEY="{key}"')
         sys.exit(0)
 
     if args.mode == "standalone":

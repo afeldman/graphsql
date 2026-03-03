@@ -413,9 +413,9 @@ class GraphSQLEngine:
                             "name": column["name"],
                             "type": str(column["type"]),
                             "nullable": column.get("nullable", True),
-                            "default": str(column.get("default"))
-                            if column.get("default")
-                            else None,
+                            "default": (
+                                str(column.get("default")) if column.get("default") else None
+                            ),
                             "autoincrement": column.get("autoincrement", False),
                         }
                     )
@@ -523,9 +523,7 @@ class GraphSQLEngine:
         """
         try:
             with get_session(self.engine) as session:
-                result = session.execute(
-                    text(f"SELECT COUNT(*) FROM {table_name}")  # noqa: S608
-                )
+                result = session.execute(text(f"SELECT COUNT(*) FROM {table_name}"))  # noqa: S608
                 scalar_result = result.scalar()
                 return cast(int | None, scalar_result)
         except Exception:
