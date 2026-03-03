@@ -16,6 +16,7 @@
     "tailwindcss": "npm:tailwindcss@3.4.1",
     "tailwindcss/": "npm:/tailwindcss@3.4.1/",
     "tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js",
+    "daisyui": "npm:daisyui@4.12.24",
     "$std/": "https://deno.land/std@0.211.0/",
     "graphql": "https://esm.sh/graphql@16.8.1",
     "graphql-request": "https://esm.sh/graphql-request@6.1.0"
