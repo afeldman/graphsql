@@ -1,7 +1,15 @@
 """JWT Authentication module for GraphSQL."""
 
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+
+try:
+    from datetime import UTC
+except ImportError:
+    from datetime import timezone
+
+    UTC = timezone.utc
+
 
 import jwt
 from fastapi import Depends, HTTPException, status
