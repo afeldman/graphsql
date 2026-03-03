@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import time
 import urllib.parse
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Self
 
 import httpx
@@ -27,7 +27,7 @@ from loguru import logger
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
-class SSOProvider(str, Enum):
+class SSOProvider(StrEnum):
     """Supported SSO/OAuth providers.
 
     Each provider has specific endpoints and configuration requirements.
