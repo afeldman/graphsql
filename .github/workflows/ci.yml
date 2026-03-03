@@ -36,7 +36,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-extras
 
       - name: Ruff
         run: |
