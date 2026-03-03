@@ -20,7 +20,7 @@ from __future__ import annotations
 import time
 import urllib.parse
 from enum import Enum
-from typing import Any, Self
+from typing import Any
 
 # Python 3.11+ has StrEnum, Python 3.10 needs a fallback
 try:
@@ -31,6 +31,13 @@ except ImportError:
         """String Enum for Python 3.10 compatibility."""
 
         pass
+
+
+# Python 3.11+ has Self in typing, Python 3.10 needs typing_extensions
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self  # type: ignore[assignment]
 
 
 import httpx
