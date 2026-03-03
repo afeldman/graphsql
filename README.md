@@ -1191,7 +1191,7 @@ mypy src/
 #### Admin (Fresh) Development
 
 ```bash
-# Install Deno (1.43+) locally
+# Install Deno (2.0+) locally
 curl -fsSL https://deno.land/install.sh | sh
 
 # Dev server (watches routes/static)

@@ -1,6 +1,6 @@
 # Production image for GraphSQL Admin (Fresh + Deno)
 
-FROM denoland/deno:1.43.6 as base
+FROM denoland/deno:2 as base
 WORKDIR /app
 
 # Cache deps
@@ -14,7 +14,7 @@ COPY . .
 RUN deno task build
 
 # --- Runtime ---
-FROM denoland/deno:1.43.6
+FROM denoland/deno:2
 WORKDIR /app
 ENV DENO_ENV=production \
     PORT=8001 \
