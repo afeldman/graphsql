@@ -37,7 +37,7 @@ except ImportError:
 try:
     from typing import Self
 except ImportError:
-    from typing_extensions import Self  # type: ignore[assignment]
+    from typing_extensions import Self  # noqa: UP035 # type: ignore[assignment]
 
 
 import httpx
