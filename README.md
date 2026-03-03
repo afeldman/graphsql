@@ -1936,8 +1936,8 @@ This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE
 ## 📞 Support
 
 - **Documentation:** See this README and `/docs` folder
-- **Issues:** [GitHub Issues](https://github.com/your-repo/graphsql/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-repo/graphsql/discussions)
+- **Issues:** [GitHub Issues](https://github.com/afeldman/graphsql/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/afeldman/graphsql/discussions)
 
 ## 📊 Changelog
 
