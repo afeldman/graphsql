@@ -1,5 +1,11 @@
 import { GraphQLClient } from "graphql-request";
 
+export interface User {
+  id: string;
+  username: string;
+  role: string;
+}
+
 export interface GraphSQLConfig {
   baseUrl: string;
   token?: string;
@@ -18,7 +24,7 @@ export class GraphSQLClient {
     });
   }
 
-  async login(username: string, password: string): Promise<{ token: string; user: any }> {
+  async login(username: string, password: string): Promise<{ token: string; user: User }> {
     const response = await fetch(`${this.baseUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,7 +49,10 @@ export class GraphSQLClient {
     return { token, user };
   }
 
-  async graphql<T = any>(query: string, variables?: Record<string, any>): Promise<T> {
+  async graphql<T = Record<string, unknown>>(
+    query: string,
+    variables?: Record<string, unknown>,
+  ): Promise<T> {
     return await this.graphqlClient.request<T>(query, variables);
   }
 }

@@ -3,7 +3,7 @@ import { signal } from "@preact/signals";
 export interface WSMessage {
   type: "insert" | "update" | "delete" | "ping";
   table?: string;
-  data?: any;
+  data?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -86,7 +86,7 @@ export class GraphSQLWebSocket {
     }
   }
 
-  send(data: any): void {
+  send(data: Record<string, unknown>): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
     } else {
@@ -105,8 +105,9 @@ export function getWebSocket(): GraphSQLWebSocket {
   if (!wsClient) {
     const baseUrl = typeof Deno !== "undefined" && Deno.env?.get
       ? Deno.env.get("GRAPHSQL_URL") || "http://localhost:8000"
-      : typeof window !== "undefined"
-      ? window.location.origin.replace(/\/admin$/, "")
+      : typeof globalThis !== "undefined" && (globalThis as Record<string, unknown>).location
+      ? (((globalThis as Record<string, unknown>).location as Record<string, unknown>)
+          .origin as string).replace(/\/admin$/, "")
       : "http://localhost:8000";
     const wsUrl = baseUrl.replace(/^http/, "ws") + "/ws";
     wsClient = new GraphSQLWebSocket(wsUrl);
