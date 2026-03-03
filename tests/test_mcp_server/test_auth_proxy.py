@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,13 +13,13 @@ from graphsql.mcp_server.auth.proxy import (
     AuthState,
     create_auth_proxy,
 )
+from graphsql.mcp_server.auth.session_manager import SessionManager
 from graphsql.mcp_server.auth.sso import OAuthToken, SSOConfig, SSOProvider, UserSession
 from graphsql.mcp_server.auth.user_config import (
     EncryptionKey,
     InMemoryConfigStore,
     UserDatabaseConfig,
 )
-from graphsql.mcp_server.auth.session_manager import SessionManager
 from graphsql.mcp_server.engine import GraphSQLEngine
 from graphsql.mcp_server.security import SecurityValidator
 
@@ -38,14 +37,14 @@ class TestAuthProxyConfig:
             redirect_uri="http://localhost:8080/callback",
         )
         encryption_key = EncryptionKey.generate()
-        
+
         config = AuthProxyConfig(
             sso=sso_config,
             encryption_key=encryption_key.to_string(),
             host="0.0.0.0",
             port=8080,
         )
-        
+
         assert config.host == "0.0.0.0"
         assert config.port == 8080
 
@@ -58,12 +57,12 @@ class TestAuthProxyConfig:
             redirect_uri="http://localhost/callback",
         )
         encryption_key = EncryptionKey.generate()
-        
+
         config = AuthProxyConfig(
             sso=sso_config,
             encryption_key=encryption_key.to_string(),
         )
-        
+
         assert config.host == "0.0.0.0"
         assert config.port == 8080
         assert config.session_timeout == 3600
@@ -97,11 +96,11 @@ class TestAuthState:
         """Test validating OAuth state."""
         auth_state = AuthState()
         state_token = await auth_state.create_state()
-        
+
         # First validation should succeed
         is_valid = await auth_state.validate_state(state_token)
         assert is_valid is True
-        
+
         # Second validation should fail (state consumed)
         is_valid = await auth_state.validate_state(state_token)
         assert is_valid is False
@@ -269,9 +268,9 @@ class TestAuthProxyWithMockAuth:
             database_url="postgresql://localhost/mydb",
             database_name="mydb",
         )
-        
+
         await config_store.save_config("user123", config)
-        
+
         retrieved = await config_store.get_config("user123")
         assert retrieved is not None
         assert retrieved.database_url == "postgresql://localhost/mydb"
@@ -285,16 +284,16 @@ class TestAuthProxyWithMockAuth:
             config_store=config_store,
             session_timeout=3600,
         )
-        
+
         # Save user config
         config = UserDatabaseConfig(
             database_url="sqlite:///:memory:",
         )
         await config_store.save_config("user123", config)
-        
+
         # Create session
         user_session = self._create_mock_session()
-        
+
         with patch(
             "graphsql.mcp_server.auth.session_manager.create_engine"
         ) as mock_create_engine, patch(
@@ -308,9 +307,9 @@ class TestAuthProxyWithMockAuth:
             mock_graphsql_engine_cls.return_value = mock_graphsql_engine
             mock_security = MagicMock(spec=SecurityValidator)
             mock_security_cls.return_value = mock_security
-            
+
             mcp_session = await session_manager.create_session(user_session)
-            
+
             assert mcp_session is not None
             assert mcp_session.user_session.user_id == "user123"
 
@@ -328,16 +327,16 @@ class TestOAuthCallbackFlow:
             redirect_uri="http://localhost/callback",
         )
         encryption_key = EncryptionKey.generate()
-        
+
         config = AuthProxyConfig(
             sso=sso_config,
             encryption_key=encryption_key.to_string(),
             config_store_type="memory",
         )
-        
+
         app = create_auth_proxy(config=config)
         client = TestClient(app)
-        
+
         # Simulate OAuth error
         response = client.get(
             "/callback?error=access_denied&error_description=User+denied+access"
@@ -355,26 +354,26 @@ class TestOAuthCallbackFlow:
             redirect_uri="http://localhost/callback",
         )
         encryption_key = EncryptionKey.generate()
-        
+
         config = AuthProxyConfig(
             sso=sso_config,
             encryption_key=encryption_key.to_string(),
             config_store_type="memory",
         )
-        
+
         app = create_auth_proxy(config=config)
         client = TestClient(app)
-        
+
         # Get state from login
         response = client.get("/login", follow_redirects=False)
         location = response.headers.get("location", "")
-        
+
         # Extract state from URL
         import urllib.parse
         parsed = urllib.parse.urlparse(location)
         params = urllib.parse.parse_qs(parsed.query)
         state = params.get("state", [""])[0]
-        
+
         # Using same state twice should fail after first use
         # (in actual implementation, state is consumed after use)
         assert len(state) > 0

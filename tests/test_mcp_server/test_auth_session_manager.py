@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
-import asyncio
-from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
 
 from graphsql.mcp_server.auth.session_manager import (
     MCPSessionFactory,
-    MCPUserSession,
     SessionManager,
 )
 from graphsql.mcp_server.auth.sso import OAuthToken, UserSession
 from graphsql.mcp_server.auth.user_config import (
     InMemoryConfigStore,
-    UserDatabaseConfig,
 )
 
 
@@ -93,7 +87,7 @@ class TestSessionManager:
     ) -> None:
         """Test creating session without existing config fails."""
         user_session = self._create_user_session("no-config-user")
-        
+
         with pytest.raises(ValueError, match="No database configuration found"):
             await session_manager.create_session(user_session)
 

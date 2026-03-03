@@ -1,11 +1,9 @@
 """Tests for MCP server security module."""
 
-import pytest
 
 from graphsql.mcp_server.config import MCPServerConfig
 from graphsql.mcp_server.security import (
     QueryType,
-    SecurityError,
     SecurityValidator,
     ValidationResult,
     get_validator,
@@ -232,7 +230,7 @@ class TestSecurityValidator:
 
     def test_validate_graphql_with_mutation(self) -> None:
         """Test validation of GraphQL mutation in read-only mode.
-        
+
         Note: Current implementation does NOT block GraphQL mutations,
         it only validates query structure. Mutationen are handled at
         the GraphQL execution layer, not at validation time.

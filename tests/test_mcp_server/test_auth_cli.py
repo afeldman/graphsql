@@ -5,8 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from io import StringIO
-from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -77,7 +76,7 @@ class TestGenerateKey:
         """Test generate-key flag is parsed correctly."""
         args = parse_args(["--generate-key"])
         assert args.generate_key is True
-    
+
     def test_generate_key_value(self) -> None:
         """Test generate_encryption_key produces valid key."""
         from graphsql.mcp_server.auth.cli import generate_encryption_key
@@ -99,11 +98,11 @@ class TestMainFunction:
 
     def test_main_with_generate_key(self) -> None:
         """Test main with generate-key flag."""
-        with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+        with patch("sys.stdout", new_callable=StringIO) as _:
             with patch.object(sys, "argv", ["graphsql-auth", "--generate-key"]):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
-                
+
                 # Should exit with 0 (success)
                 assert exc_info.value.code == 0 or exc_info.value.code is None
 
@@ -117,7 +116,7 @@ class TestMainFunction:
             "SSO_REDIRECT_URI": "http://localhost/callback",
             "ENCRYPTION_KEY": "dGVzdC1lbmNyeXB0aW9uLWtleS0zMi1ieXRlcw==",
         }
-        
+
         with patch.dict(os.environ, env_vars, clear=True):
             with patch.object(sys, "argv", ["graphsql-auth"]):
                 # Should fail due to missing tenant_id
@@ -145,7 +144,7 @@ class TestCLIIntegration:
         with patch.object(sys, "argv", ["graphsql-auth", "--help"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
-            
+
             # Help should exit with 0
             assert exc_info.value.code == 0
 

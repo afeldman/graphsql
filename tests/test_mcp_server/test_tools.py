@@ -1,6 +1,5 @@
 """Tests for MCP server tools module."""
 
-import pytest
 from sqlalchemy import text
 
 from graphsql.mcp_server.config import MCPServerConfig, reset_config
@@ -9,7 +8,6 @@ from graphsql.mcp_server.engine import GraphSQLEngine, reset_graphsql_engine
 from graphsql.mcp_server.tools import (
     TOOL_DEFINITIONS,
     GraphQLQueryInput,
-    HealthCheckInput,
     HealthResponse,
     MCPTools,
     QueryResponse,

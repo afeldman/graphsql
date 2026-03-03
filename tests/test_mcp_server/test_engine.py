@@ -1,6 +1,5 @@
 """Tests for MCP server engine module."""
 
-import pytest
 from sqlalchemy import text
 
 from graphsql.mcp_server.config import MCPServerConfig, reset_config
@@ -8,7 +7,6 @@ from graphsql.mcp_server.db import close_engine, get_engine
 from graphsql.mcp_server.engine import (
     GraphSQLEngine,
     QueryResult,
-    QueryTimeoutError,
     SchemaInfo,
     get_graphsql_engine,
     reset_graphsql_engine,
@@ -188,7 +186,7 @@ class TestGraphSQLEngine:
     def test_sql_query_readonly_blocks_insert(self) -> None:
         """Test that read-only mode blocks INSERT."""
         from graphsql.mcp_server.security import SecurityValidator
-        
+
         readonly_config = MCPServerConfig(
             database_url="sqlite:///:memory:",
             read_only=True,
@@ -202,7 +200,7 @@ class TestGraphSQLEngine:
     def test_sql_query_readonly_blocks_update(self) -> None:
         """Test that read-only mode blocks UPDATE."""
         from graphsql.mcp_server.security import SecurityValidator
-        
+
         readonly_config = MCPServerConfig(
             database_url="sqlite:///:memory:",
             read_only=True,
@@ -216,7 +214,7 @@ class TestGraphSQLEngine:
     def test_sql_query_readonly_blocks_delete(self) -> None:
         """Test that read-only mode blocks DELETE."""
         from graphsql.mcp_server.security import SecurityValidator
-        
+
         readonly_config = MCPServerConfig(
             database_url="sqlite:///:memory:",
             read_only=True,
@@ -266,7 +264,7 @@ class TestGraphSQLEngine:
     def test_refresh_metadata(self) -> None:
         """Test metadata refresh."""
         # Initial metadata
-        metadata1 = self.engine.metadata
+        _ = self.engine.metadata
 
         # Add a table using begin() for auto-commit
         with self.db_engine.begin() as conn:

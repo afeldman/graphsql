@@ -3,8 +3,6 @@
 import os
 from unittest.mock import patch
 
-import pytest
-
 from graphsql.mcp_server.config import MCPServerConfig, get_config, reset_config
 
 

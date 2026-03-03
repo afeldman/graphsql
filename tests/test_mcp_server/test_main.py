@@ -1,7 +1,8 @@
 """Tests for MCP server main module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from sqlalchemy import text
 
 from graphsql.mcp_server.config import MCPServerConfig, reset_config

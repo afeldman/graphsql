@@ -1,6 +1,5 @@
 """Tests for MCP server database module."""
 
-import pytest
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 

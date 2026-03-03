@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import os
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import pytest
 
@@ -106,7 +104,7 @@ class TestEncryptionKey:
         key1 = EncryptionKey.generate()
         key_string = key1.to_string()
         key2 = EncryptionKey.from_string(key_string)
-        
+
         # Both keys should produce same encryption/decryption
         data = "test data"
         encrypted = key1.encrypt(data)
@@ -247,18 +245,18 @@ class TestFileConfigStore:
             database_url="postgresql://secret:password@localhost/db",
         )
         await store.save_config("user123", config)
-        
+
         # Find the encrypted config file (it uses hashed name)
         enc_files = list(temp_dir.glob("*.enc"))
         assert len(enc_files) >= 1
-        
+
         # Read the raw file (excluding index file)
         config_files = [f for f in enc_files if not f.name.startswith(".")]
         assert len(config_files) >= 1
-        
+
         with open(config_files[0]) as f:
             raw_content = f.read()
-        
+
         # The password should not be visible in plaintext
         assert "password" not in raw_content
 
@@ -320,13 +318,13 @@ class TestFileConfigStore:
         """Test that different keys cannot decrypt configs."""
         key1 = EncryptionKey.generate()
         key2 = EncryptionKey.generate()
-        
+
         store1 = FileConfigStore(base_path=temp_dir, encryption_key=key1)
         store2 = FileConfigStore(base_path=temp_dir, encryption_key=key2)
-        
+
         config = UserDatabaseConfig(database_url="postgresql://localhost/db")
         await store1.save_config("user123", config)
-        
+
         # Store2 with different key should not be able to decrypt
         # Implementation returns None on decryption failure
         result = await store2.get_config("user123")
