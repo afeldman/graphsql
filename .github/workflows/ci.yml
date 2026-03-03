@@ -39,13 +39,13 @@ jobs:
         run: uv sync
 
       - name: Ruff
-        run: uv run ruff check src/
+        run: .venv/bin/ruff check src/
 
       - name: Black
-        run: uv run black --check src/
+        run: .venv/bin/black --check src/
 
       - name: Mypy
-        run: uv run mypy src/
+        run: .venv/bin/mypy src/
         continue-on-error: true
 
       - name: Pytest
