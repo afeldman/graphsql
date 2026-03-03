@@ -19,8 +19,17 @@ from __future__ import annotations
 
 import time
 import urllib.parse
-from enum import StrEnum
+from enum import Enum
 from typing import Any, Self
+
+# Python 3.11+ has StrEnum, Python 3.10 needs a fallback
+try:
+    from enum import StrEnum
+except ImportError:
+    class StrEnum(str, Enum):  # type: ignore[no-redef]
+        """String Enum for Python 3.10 compatibility."""
+
+        pass
 
 import httpx
 from loguru import logger
