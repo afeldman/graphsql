@@ -7,6 +7,7 @@ try:
     from datetime import UTC
 except ImportError:
     from datetime import timezone
+
     datetime.UTC = timezone.utc
 
 
