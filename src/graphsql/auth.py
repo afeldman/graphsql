@@ -1,6 +1,8 @@
 """JWT Authentication module for GraphSQL."""
 
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -35,12 +37,12 @@ class TokenResponse(BaseModel):
 
 def hash_password(password: str) -> str:
     """Hash password using bcrypt."""
-    return pwd_context.hash(password)
+    return pwd_context.hash(password)  # type: ignore[no-any-return]
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)  # type: ignore[no-any-return]
 
 
 def create_access_token(
@@ -135,10 +137,14 @@ async def get_optional_user(
         return None
 
 
-def require_scope(required_scope: str):
+def require_scope(
+    required_scope: str,
+) -> Callable:
     """Create dependency that requires specific scope."""
 
-    async def scope_checker(user: TokenData = Depends(get_current_user)) -> TokenData:
+    async def scope_checker(
+        user: TokenData = Depends(get_current_user),
+    ) -> TokenData:
         if user.scope != required_scope and user.scope != "admin":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

@@ -82,9 +82,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> Server:
         """
         return [
             Tool(
-                name=tool["name"],
-                description=tool["description"],
-                inputSchema=tool["inputSchema"],
+                name=str(tool["name"]),
+                description=str(tool["description"]),
+                inputSchema=tool["inputSchema"],  # type: ignore[arg-type]
             )
             for tool in TOOL_DEFINITIONS
         ]

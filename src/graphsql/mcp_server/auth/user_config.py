@@ -505,7 +505,7 @@ class RedisConfigStore(UserConfigStore):
             try:
                 import redis.asyncio as redis
 
-                self._client = redis.from_url(self.redis_url)  # type: ignore[no-untyped-call]
+                self._client = redis.from_url(self.redis_url)  # type: ignore[misc]
             except ImportError as e:
                 raise ImportError(
                     "Redis support requires the 'redis' package. "

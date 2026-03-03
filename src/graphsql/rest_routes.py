@@ -40,9 +40,9 @@ async def list_tables(request: Request) -> dict[str, list[str]]:
     cache_key = "tables:list"
     cached = await cache_get(cache_key)
     if cached is not None:
-        return cached
+        return cached  # type: ignore[no-any-return]
 
-    tables = {"tables": db_manager.list_tables()}
+    tables: dict[str, list[str]] = {"tables": db_manager.list_tables()}
     await cache_set(cache_key, tables)
     return tables
 
@@ -64,7 +64,7 @@ async def get_table_info(request: Request, table_name: str) -> dict[str, Any]:
     cache_key = f"tables:info:{table_name}"
     cached = await cache_get(cache_key)
     if cached is not None:
-        return cached
+        return cached  # type: ignore[no-any-return]
 
     info = db_manager.get_table_info(table_name)
     if not info:

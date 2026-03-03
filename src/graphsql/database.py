@@ -176,7 +176,7 @@ def serialize_model(obj: Any) -> dict[str, Any]:
         if isinstance(value, (datetime, date)):
             result[column.name] = value.isoformat()
         elif isinstance(value, Decimal):
-            result[column.name] = float(value)
+            result[column.name] = float(value)  # type: ignore[assignment]
         elif isinstance(value, bytes):
             result[column.name] = value.decode("utf-8", errors="ignore")
         else:

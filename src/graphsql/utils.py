@@ -19,7 +19,7 @@ def clean_dict(data: dict[str, Any]) -> dict[str, Any]:
         >>> clean_dict({"id": 1, "ts": datetime(2024, 1, 1), "note": None})
         {'id': 1, 'ts': '2024-01-01T00:00:00'}
     """
-    cleaned = {}
+    cleaned: dict[str, Any] = {}
     for key, value in data.items():
         if value is None:
             continue

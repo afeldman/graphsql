@@ -36,21 +36,22 @@ def create_graphql_schema() -> GraphQLRouter:
             continue
 
         # Create Strawberry type dynamically
-        fields = {}
+        fields: dict[str, Any] = {}
         for column in model.__table__.columns:
             python_type = column.type.python_type
 
             # Map Python types to Strawberry types
+            field_type: type
             if python_type is str:
-                field_type = str | None
+                field_type = str | None  # type: ignore[assignment]
             elif python_type is int:
-                field_type = int | None
+                field_type = int | None  # type: ignore[assignment]
             elif python_type is float:
-                field_type = float | None
+                field_type = float | None  # type: ignore[assignment]
             elif python_type is bool:
-                field_type = bool | None
+                field_type = bool | None  # type: ignore[assignment]
             else:
-                field_type = str | None  # Fallback
+                field_type = str | None  # type: ignore[assignment]
 
             fields[column.name] = field_type
 
@@ -148,23 +149,24 @@ def create_graphql_schema() -> GraphQLRouter:
         model = db_manager.get_model(table_name)
 
         # Create mutation input type
-        input_fields = {}
-        for column in model.__table__.columns:
+        input_fields: dict[str, Any] = {}
+        for column in model.__table__.columns:  # type: ignore[union-attr]
             if not column.primary_key and not column.autoincrement:
                 python_type = column.type.python_type
 
+                input_field_type: type
                 if python_type is str:
-                    field_type = str | None
+                    input_field_type = str | None  # type: ignore[assignment]
                 elif python_type is int:
-                    field_type = int | None
+                    input_field_type = int | None  # type: ignore[assignment]
                 elif python_type is float:
-                    field_type = float | None
+                    input_field_type = float | None  # type: ignore[assignment]
                 elif python_type is bool:
-                    field_type = bool | None
+                    input_field_type = bool | None  # type: ignore[assignment]
                 else:
-                    field_type = str | None
+                    input_field_type = str | None  # type: ignore[assignment]
 
-                input_fields[column.name] = field_type
+                input_fields[column.name] = input_field_type
 
         # Create Input type
         input_type = strawberry.input(

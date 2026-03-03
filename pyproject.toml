@@ -173,6 +173,19 @@ ignore_missing_imports = true
 module = "decouple.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "passlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "slowapi.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "graphsql.mcp_server.*"
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
