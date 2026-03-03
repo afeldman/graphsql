@@ -2,7 +2,6 @@
 
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 import jwt
 from fastapi import Depends, HTTPException, status
