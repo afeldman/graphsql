@@ -23,7 +23,13 @@ import hashlib
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
+
+# Python 3.11+ has Self in typing, Python 3.10 needs typing_extensions
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self  # noqa: UP035 # type: ignore[assignment]
 
 from cryptography.fernet import Fernet
 from loguru import logger
